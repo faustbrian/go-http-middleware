@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c
+        with:
+          go-version: 1.26.5
+          cache: false
+      - run: make check
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+      - name: Build source artifact
+        run: |
+          mkdir dist
+          git archive --format=tar --prefix="go-http-middleware-${GITHUB_REF_NAME}/" HEAD | gzip -n > "dist/go-http-middleware-${GITHUB_REF_NAME}.tar.gz"
+          cd dist
+          sha256sum "go-http-middleware-${GITHUB_REF_NAME}.tar.gz" > checksums.txt
+      - name: Sign build provenance
+        id: attest
+        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6
+        with:
+          subject-checksums: dist/checksums.txt
+      - name: Publish signed release
+        run: gh release create "$GITHUB_REF_NAME" dist/* "${{ steps.attest.outputs.bundle-path }}" --generate-notes --verify-tag
+        env:
+          GH_TOKEN: ${{ github.token }}
