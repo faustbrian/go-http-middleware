@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/faustbrian/golib/pkg/http-middleware/content"
+	"github.com/faustbrian/go-http-middleware/content"
 )
 
 func TestUnsupportedRequestMediaTypeReturns415(t *testing.T) {

@@ -8,12 +8,12 @@ import (
 	"net/netip"
 	"testing"
 
-	middleware "github.com/faustbrian/golib/pkg/http-middleware"
-	"github.com/faustbrian/golib/pkg/http-middleware/admission"
-	compressmw "github.com/faustbrian/golib/pkg/http-middleware/compress"
-	"github.com/faustbrian/golib/pkg/http-middleware/cors"
-	"github.com/faustbrian/golib/pkg/http-middleware/proxy"
-	"github.com/faustbrian/golib/pkg/http-middleware/requestid"
+	middleware "github.com/faustbrian/go-http-middleware"
+	"github.com/faustbrian/go-http-middleware/admission"
+	compressmw "github.com/faustbrian/go-http-middleware/compress"
+	"github.com/faustbrian/go-http-middleware/cors"
+	"github.com/faustbrian/go-http-middleware/proxy"
+	"github.com/faustbrian/go-http-middleware/requestid"
 )
 
 func BenchmarkBaseAndDeepChains(b *testing.B) {

@@ -1,5 +1,5 @@
-PACKAGE github.com/faustbrian/golib/pkg/http-middleware
-package middleware // import "github.com/faustbrian/golib/pkg/http-middleware"
+PACKAGE github.com/faustbrian/go-http-middleware
+package middleware // import "github.com/faustbrian/go-http-middleware"
 
 Package middleware composes explicit net/http middleware without a registry.
 
@@ -120,8 +120,8 @@ type Predicate func(*http.Request) bool
     A panic propagates to the caller; cancellation is observable through
     r.Context.
 
-PACKAGE github.com/faustbrian/golib/pkg/http-middleware/adapter
-package adapter // import "github.com/faustbrian/golib/pkg/http-middleware/adapter"
+PACKAGE github.com/faustbrian/go-http-middleware/adapter
+package adapter // import "github.com/faustbrian/go-http-middleware/adapter"
 
 Package adapter names middleware owned by sibling packages without
 reimplementing their policy or state machines.
@@ -178,8 +178,8 @@ func (e *OwnershipError) Error() string
 
 func (e *OwnershipError) Unwrap() error
 
-PACKAGE github.com/faustbrian/golib/pkg/http-middleware/admission
-package admission // import "github.com/faustbrian/golib/pkg/http-middleware/admission"
+PACKAGE github.com/faustbrian/go-http-middleware/admission
+package admission // import "github.com/faustbrian/go-http-middleware/admission"
 
 Package admission bounds local in-flight requests without implementing a
 distributed rate algorithm.
@@ -216,8 +216,8 @@ type Policy struct {
     Policy configures bounded local request admission. Wait is capped at one
     minute.
 
-PACKAGE github.com/faustbrian/golib/pkg/http-middleware/bodylimit
-package bodylimit // import "github.com/faustbrian/golib/pkg/http-middleware/bodylimit"
+PACKAGE github.com/faustbrian/go-http-middleware/bodylimit
+package bodylimit // import "github.com/faustbrian/go-http-middleware/bodylimit"
 
 Package bodylimit applies a byte limit before application decoding.
 
@@ -247,8 +247,8 @@ type Policy struct{ MaxBytes int64 }
     Policy limits encoded transport bytes. It does not decompress or parse a
     body.
 
-PACKAGE github.com/faustbrian/golib/pkg/http-middleware/compress
-package compress // import "github.com/faustbrian/golib/pkg/http-middleware/compress"
+PACKAGE github.com/faustbrian/go-http-middleware/compress
+package compress // import "github.com/faustbrian/go-http-middleware/compress"
 
 Package compress performs bounded gzip content-coding negotiation. Sensitive
 dynamic responses should opt out by setting Cache-Control: no-transform.
@@ -284,8 +284,8 @@ type Policy struct {
     Policy configures bounded gzip response compression. ExcludedTypes accepts
     at most 64 exact media types of at most 256 bytes each.
 
-PACKAGE github.com/faustbrian/golib/pkg/http-middleware/content
-package content // import "github.com/faustbrian/golib/pkg/http-middleware/content"
+PACKAGE github.com/faustbrian/go-http-middleware/content
+package content // import "github.com/faustbrian/go-http-middleware/content"
 
 Package content enforces HTTP media-type negotiation without decoding or
 encoding representations.
@@ -319,8 +319,8 @@ type Policy struct {
     Each configured list is bounded by MaxValues and both lists share the
     MaxHeaderBytes construction budget.
 
-PACKAGE github.com/faustbrian/golib/pkg/http-middleware/cors
-package cors // import "github.com/faustbrian/golib/pkg/http-middleware/cors"
+PACKAGE github.com/faustbrian/go-http-middleware/cors
+package cors // import "github.com/faustbrian/go-http-middleware/cors"
 
 Package cors implements the server-facing portion of the Fetch CORS protocol.
 CORS is neither authentication nor CSRF protection.
@@ -362,8 +362,8 @@ type Policy struct {
 }
     Policy is normalized and copied during construction.
 
-PACKAGE github.com/faustbrian/golib/pkg/http-middleware/deadline
-package deadline // import "github.com/faustbrian/golib/pkg/http-middleware/deadline"
+PACKAGE github.com/faustbrian/go-http-middleware/deadline
+package deadline // import "github.com/faustbrian/go-http-middleware/deadline"
 
 Package deadline gives request contexts a bounded handler deadline. It does not
 replace server read, write, idle, upstream, shutdown, or process limits.
@@ -416,8 +416,8 @@ type TimeoutPolicy struct {
     concurrency slot, but cannot write through the closed buffer or create
     unbounded middleware-owned goroutine growth.
 
-PACKAGE github.com/faustbrian/golib/pkg/http-middleware/internal/httpx
-package httpx // import "github.com/faustbrian/golib/pkg/http-middleware/internal/httpx"
+PACKAGE github.com/faustbrian/go-http-middleware/internal/httpx
+package httpx // import "github.com/faustbrian/go-http-middleware/internal/httpx"
 
 Package httpx contains bounded response mechanics shared by middleware.
 
@@ -459,8 +459,8 @@ type Recorder struct {
 func Track(writer http.ResponseWriter) (http.ResponseWriter, *Recorder)
     Track returns a writer with exactly the optional interfaces of writer.
 
-PACKAGE github.com/faustbrian/golib/pkg/http-middleware/middlewaretest
-package middlewaretest // import "github.com/faustbrian/golib/pkg/http-middleware/middlewaretest"
+PACKAGE github.com/faustbrian/go-http-middleware/middlewaretest
+package middlewaretest // import "github.com/faustbrian/go-http-middleware/middlewaretest"
 
 Package middlewaretest provides deterministic fixtures for middleware users.
 
@@ -489,8 +489,8 @@ func (t *Trace) Middleware(name string) func(http.Handler) http.Handler
 func (t *Trace) Record(event string)
     Record appends an event until the trace's fixed bound is reached.
 
-PACKAGE github.com/faustbrian/golib/pkg/http-middleware/observe
-package observe // import "github.com/faustbrian/golib/pkg/http-middleware/observe"
+PACKAGE github.com/faustbrian/go-http-middleware/observe
+package observe // import "github.com/faustbrian/go-http-middleware/observe"
 
 Package observe emits one bounded transport completion event per request.
 
@@ -558,8 +558,8 @@ type Policy struct {
     Policy injects observation without owning a logger or telemetry SDK.
     Route and ClientClass run once at completion; their panics are contained.
 
-PACKAGE github.com/faustbrian/golib/pkg/http-middleware/proxy
-package proxy // import "github.com/faustbrian/golib/pkg/http-middleware/proxy"
+PACKAGE github.com/faustbrian/go-http-middleware/proxy
+package proxy // import "github.com/faustbrian/go-http-middleware/proxy"
 
 Package proxy derives effective request information only across explicitly
 trusted proxy address boundaries. It never mutates the request target.
@@ -626,8 +626,8 @@ const (
 	// TrustedForwarded means trusted forwarding metadata was used.
 	TrustedForwarded Provenance = "trusted_forwarded"
 )
-PACKAGE github.com/faustbrian/golib/pkg/http-middleware/recovery
-package recovery // import "github.com/faustbrian/golib/pkg/http-middleware/recovery"
+PACKAGE github.com/faustbrian/go-http-middleware/recovery
+package recovery // import "github.com/faustbrian/go-http-middleware/recovery"
 
 Package recovery contains application panics below an explicit boundary.
 
@@ -676,8 +676,8 @@ type Policy struct {
 }
     Policy configures recovery observation. Observer panics are contained.
 
-PACKAGE github.com/faustbrian/golib/pkg/http-middleware/requestid
-package requestid // import "github.com/faustbrian/golib/pkg/http-middleware/requestid"
+PACKAGE github.com/faustbrian/go-http-middleware/requestid
+package requestid // import "github.com/faustbrian/go-http-middleware/requestid"
 
 Package requestid propagates bounded request and correlation identifiers.
 Identifiers are metadata and are never authorization evidence.
@@ -741,8 +741,8 @@ type Policy struct {
 }
     Policy is copied by New and is safe to reuse after construction.
 
-PACKAGE github.com/faustbrian/golib/pkg/http-middleware/responsepolicy
-package responsepolicy // import "github.com/faustbrian/golib/pkg/http-middleware/responsepolicy"
+PACKAGE github.com/faustbrian/go-http-middleware/responsepolicy
+package responsepolicy // import "github.com/faustbrian/go-http-middleware/responsepolicy"
 
 Package responsepolicy contains declarative cache and transport admission
 helpers. It does not implement caching or own health handlers.
@@ -791,8 +791,8 @@ const (
 	// Maintenance rejects requests during maintenance.
 	Maintenance
 )
-PACKAGE github.com/faustbrian/golib/pkg/http-middleware/secureheader
-package secureheader // import "github.com/faustbrian/golib/pkg/http-middleware/secureheader"
+PACKAGE github.com/faustbrian/go-http-middleware/secureheader
+package secureheader // import "github.com/faustbrian/go-http-middleware/secureheader"
 
 Package secureheader applies explicit response security header policy.
 

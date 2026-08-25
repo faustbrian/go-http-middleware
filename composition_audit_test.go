@@ -8,7 +8,7 @@ import (
 	"slices"
 	"testing"
 
-	middleware "github.com/faustbrian/golib/pkg/http-middleware"
+	middleware "github.com/faustbrian/go-http-middleware"
 )
 
 var recommendedLayers = []string{

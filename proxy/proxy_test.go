@@ -6,7 +6,7 @@ import (
 	"net/netip"
 	"testing"
 
-	"github.com/faustbrian/golib/pkg/http-middleware/proxy"
+	"github.com/faustbrian/go-http-middleware/proxy"
 )
 
 func TestUntrustedPeerCannotInfluenceEffectiveInformation(t *testing.T) {

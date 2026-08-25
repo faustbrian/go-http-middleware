@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/faustbrian/golib/pkg/http-middleware/internal/httpx"
+	"github.com/faustbrian/go-http-middleware/internal/httpx"
 )
 
 // NoStore applies RFC 9111 no-store response policy before downstream handling.

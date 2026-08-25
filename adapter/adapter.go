@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
-	middleware "github.com/faustbrian/golib/pkg/http-middleware"
+	middleware "github.com/faustbrian/go-http-middleware"
 )
 
 // Concern is a bounded ownership and introspection name.

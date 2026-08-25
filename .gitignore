@@ -1,5 +1,5 @@
-/coverage.out
-/dist/
-*.test
-*.prof
-mutation.log
+.artifacts/
+.tools/
+.gocache*/
+.DS_Store
+coverage.out

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faustbrian/golib/pkg/http-middleware/deadline"
+	"github.com/faustbrian/go-http-middleware/deadline"
 )
 
 func TestDeadlineNeverExtendsParent(t *testing.T) {

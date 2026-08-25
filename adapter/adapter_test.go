@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	middleware "github.com/faustbrian/golib/pkg/http-middleware"
-	"github.com/faustbrian/golib/pkg/http-middleware/adapter"
+	middleware "github.com/faustbrian/go-http-middleware"
+	"github.com/faustbrian/go-http-middleware/adapter"
 )
 
 func TestGoServiceOwnershipRejectsDuplicateCoreMiddleware(t *testing.T) {

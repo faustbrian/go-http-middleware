@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/faustbrian/golib/pkg/http-middleware/internal/httpx"
+	"github.com/faustbrian/go-http-middleware/internal/httpx"
 )
 
 // Outcome is a bounded completion classification.

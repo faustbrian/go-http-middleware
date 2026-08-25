@@ -14,7 +14,7 @@ import (
 
 	"golang.org/x/net/idna"
 
-	"github.com/faustbrian/golib/pkg/http-middleware/internal/httpx"
+	"github.com/faustbrian/go-http-middleware/internal/httpx"
 )
 
 // ErrInvalidPolicy identifies invalid CORS policy configuration.

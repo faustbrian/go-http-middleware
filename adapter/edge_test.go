@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	middleware "github.com/faustbrian/golib/pkg/http-middleware"
+	middleware "github.com/faustbrian/go-http-middleware"
 )
 
 func TestOwnershipErrorAndInvalidConcerns(t *testing.T) {

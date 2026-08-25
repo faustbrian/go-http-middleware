@@ -4,6 +4,8 @@ This project follows Semantic Versioning and Keep a Changelog.
 
 ## Unreleased
 
+## 1.0.0 - 2026-08-25
+
 ### Documentation
 
 - Replace obsolete standalone-repository links and workflow claims with
@@ -25,6 +27,7 @@ This project follows Semantic Versioning and Keep a Changelog.
 
 ### Changed
 
+- Publish the module from its standalone `github.com/faustbrian/go-http-middleware` identity while preserving its documented API and behavior.
 - Link the conformance source matrix directly to the canonical specification
   decision register.
 - Regenerated the exported API baseline with the pinned Go documentation

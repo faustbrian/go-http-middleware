@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/faustbrian/golib/pkg/http-middleware/recovery"
+	"github.com/faustbrian/go-http-middleware/recovery"
 )
 
 func TestRecoveryWritesSafeResponseAndObservesBoundedClass(t *testing.T) {

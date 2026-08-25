@@ -7,13 +7,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/faustbrian/golib/pkg/correlation"
-	httpcorrelation "github.com/faustbrian/golib/pkg/correlation/http"
-	middleware "github.com/faustbrian/golib/pkg/http-middleware"
-	"github.com/faustbrian/golib/pkg/http-middleware/adapter"
-	"github.com/faustbrian/golib/pkg/http-middleware/observe"
-	router "github.com/faustbrian/golib/pkg/router"
-	"github.com/faustbrian/golib/pkg/service/serverhttp"
+	"github.com/faustbrian/go-correlation"
+	httpcorrelation "github.com/faustbrian/go-correlation/http"
+	middleware "github.com/faustbrian/go-http-middleware"
+	"github.com/faustbrian/go-http-middleware/adapter"
+	"github.com/faustbrian/go-http-middleware/observe"
+	router "github.com/faustbrian/go-router"
+	"github.com/faustbrian/go-service/serverhttp"
 )
 
 func TestGoRouterProvidesBoundedObservationMetadata(t *testing.T) {

@@ -1,8 +1,8 @@
 # Compatibility
 
 The public contract is Go 1.26.6 `net/http`. API snapshots are checked against
-`api/baseline.txt`. Before v1, incompatible changes require changelog and
-migration notes; after v1 they require a new major version.
+`api/baseline.txt`. Incompatible changes require a new major version, changelog,
+and migration notes.
 
 HTTP/1.1 and HTTP/2 real-listener tests cover final responses, trailers,
 informational responses, flushing, and protocol-specific hijacking. HTTP/3 is

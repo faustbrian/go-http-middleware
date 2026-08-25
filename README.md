@@ -1,8 +1,14 @@
 # http-middleware
 
-[![CI](https://github.com/faustbrian/golib/actions/workflows/ci.yml/badge.svg)](https://github.com/faustbrian/golib/actions/workflows/ci.yml)
-[![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/golib/pkg/http-middleware.svg)](https://pkg.go.dev/github.com/faustbrian/golib/pkg/http-middleware)
-[![Go Report Card](https://goreportcard.com/badge/github.com/faustbrian/golib/pkg/http-middleware)](https://goreportcard.com/report/github.com/faustbrian/golib/pkg/http-middleware)
+[![CI](https://github.com/faustbrian/go-http-middleware/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/faustbrian/go-http-middleware/actions/workflows/ci.yml)
+[![CodeQL](https://img.shields.io/badge/CodeQL-required-blue)](https://github.com/faustbrian/go-http-middleware/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-100%25_required-blue)](CONTRIBUTING.md#verification)
+[![Mutation](https://img.shields.io/badge/mutation-100%25_required-blue)](CONTRIBUTING.md#verification)
+[![Documentation](https://img.shields.io/badge/docs-checked_in_CI-blue)](docs/)
+[![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-http-middleware.svg)](https://pkg.go.dev/github.com/faustbrian/go-http-middleware)
+[![Release](https://img.shields.io/github/v/release/faustbrian/go-http-middleware?sort=semver)](https://github.com/faustbrian/go-http-middleware/releases)
+[![Go](https://img.shields.io/badge/go-1.26.6-00ADD8?logo=go)](https://go.dev/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Explicit, bounded server-side HTTP middleware built on `net/http`. The root
 package composes only the middleware supplied by the caller. There is no

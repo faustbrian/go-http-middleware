@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/faustbrian/golib/pkg/http-middleware/secureheader"
+	"github.com/faustbrian/go-http-middleware/secureheader"
 )
 
 func TestAPIDefaultsApplyBeforeDownstreamResponses(t *testing.T) {

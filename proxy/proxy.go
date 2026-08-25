@@ -14,7 +14,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/faustbrian/golib/pkg/http-middleware/internal/httpx"
+	"github.com/faustbrian/go-http-middleware/internal/httpx"
 )
 
 // Mode selects one forwarding syntax.

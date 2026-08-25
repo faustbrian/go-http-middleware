@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"sync/atomic"
 
-	"github.com/faustbrian/golib/pkg/http-middleware/internal/httpx"
+	"github.com/faustbrian/go-http-middleware/internal/httpx"
 )
 
 // ErrInvalidPolicy identifies invalid request body limit configuration.

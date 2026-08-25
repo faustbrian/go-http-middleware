@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/faustbrian/golib/pkg/http-middleware/content"
+	"github.com/faustbrian/go-http-middleware/content"
 )
 
 func FuzzAcceptMediaTypes(f *testing.F) {

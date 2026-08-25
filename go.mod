@@ -1,4 +1,4 @@
-module github.com/faustbrian/golib/pkg/http-middleware
+module github.com/faustbrian/go-http-middleware
 
 go 1.26.6
 

@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Security fixes are provided for the latest tagged major version. Before v1,
+Security fixes are provided for the latest tagged major version.
 only the latest release is supported.
 
 ## Reporting

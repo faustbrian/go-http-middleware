@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/faustbrian/golib/pkg/http-middleware/internal/httpx"
+	"github.com/faustbrian/go-http-middleware/internal/httpx"
 )
 
 // Policy configures request and response media-type requirements. Each

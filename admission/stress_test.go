@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faustbrian/golib/pkg/http-middleware/admission"
+	"github.com/faustbrian/go-http-middleware/admission"
 )
 
 func TestOverloadStormStaysBoundedAndRecovers(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/faustbrian/golib/pkg/http-middleware/bodylimit"
+	"github.com/faustbrian/go-http-middleware/bodylimit"
 )
 
 func TestKnownOversizedBodyIsRejectedBeforeHandler(t *testing.T) {
