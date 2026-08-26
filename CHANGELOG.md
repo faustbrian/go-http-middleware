@@ -4,6 +4,11 @@ This project follows Semantic Versioning and Keep a Changelog.
 
 ## Unreleased
 
+### Documentation
+
+- Remove completed implementation plans from the release tree and retain
+  package-owned documentation as the maintained reference.
+
 ## 1.0.0 - 2026-08-25
 
 ### Changed
