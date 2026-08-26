@@ -29,7 +29,7 @@ github.com/faustbrian/go-jsonrpc v1.0.0 h1:lqzpP82rWMeIG5bFLhXmIngzsKuvXwKhdGoYJ
 github.com/faustbrian/go-jsonrpc v1.0.0/go.mod h1:gdYA/wi8eAeptM4Lf9qwPA6eImChPa2Ng9/+/UvpOPQ=
 github.com/faustbrian/go-log v1.0.0 h1:u/MlvkLTzud3xaXk1rTrfgCQcpyUvlPEwL7ruAq+rcw=
 github.com/faustbrian/go-log v1.0.0/go.mod h1:hwFD9uvNXWat2MF855ncxF4opNWHjhsErO/mE6SUN6E=
-github.com/faustbrian/go-openapi v1.0.0 h1:ds3mPALVCegmHDAHIbP0QIsb0p8FgfyGFW/ih0yeOLg=
+github.com/faustbrian/go-openapi v1.0.0 h1:vWjIcRZuaCcdjLw/pVCqnyRzowUbmPSpaK4DHoPsT9A=
 github.com/faustbrian/go-openapi v1.0.0/go.mod h1:mfPnE2VDlthZVCYI7UBM6RYMZQjMFUUHYtbBNTfs2BY=
 github.com/faustbrian/go-router v1.0.0 h1:fKW+nw3wJyiNT24ezdpx4D+jVRQm3ko/dnaIcj9/W2Y=
 github.com/faustbrian/go-router v1.0.0/go.mod h1:oAtgnYtUx0nj52izJeWzh7bahDcEBQq4mF5na0yd6qw=
