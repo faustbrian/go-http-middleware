@@ -3,7 +3,8 @@
 `BenchmarkBaseAndDeepChains`, `BenchmarkRequestID`, `BenchmarkProxyParsing`,
 `BenchmarkCORSPreflight`, `BenchmarkCompression`, and
 `BenchmarkAdmissionContention` report allocations and latency with `-benchmem`.
-Run `make benchmark` on the target architecture before setting budgets.
+Run `make check` on the target architecture before setting budgets; the shared
+contract includes the benchmark gate.
 
 Base chains allocate only what their terminal and test writer require.
 Context-producing middleware necessarily allocates request context nodes.

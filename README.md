@@ -127,8 +127,11 @@ interfaces. See [the complete matrix](docs/responsewriter.md).
 make check
 ```
 
-Every blocking CI command has a local target. `make nilaway` is advisory.
-Hosted release publication remains separate from local verification.
+`make inventory` validates manifest consistency and `make ci` runs the
+repository plus module contract. The pinned `go-library-tools` release in
+`.golib.yaml` owns generic verification; package-specific HTTP conformance and
+sibling interoperability remain in the repository. Hosted release publication
+remains separate from local verification.
 
 The CI badge covers the blocking `quality`, `lint`, `staticcheck`, and
 `vulnerability` jobs. Release verification repeats `make check` before a

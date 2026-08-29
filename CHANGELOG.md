@@ -4,6 +4,13 @@ This project follows Semantic Versioning and Keep a Changelog.
 
 ## Unreleased
 
+### Changed
+
+- Replace copied repository verification tooling with the pinned
+  `go-library-tools` v1.0.4 contract while preserving the API baseline,
+  mutation checkpoints, HTTP conformance tests, sibling integration harness,
+  and package fixtures.
+
 ### Documentation
 
 - Remove completed implementation plans from the release tree and retain

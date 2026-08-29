@@ -222,10 +222,12 @@
         "go.uber.org/goleak",
         "golang.org/x/net"
       ],
+      "interoperability_tools": [
+        "Pinned sibling router and service integration contracts"
+      ],
       "required_services": [],
       "build_tags": [],
       "test_tags": [],
-      "interoperability_tools": [],
       "specifications": [
         "Go 1.26.6 net/http and context contracts",
         "RFC 9110 HTTP Semantics",

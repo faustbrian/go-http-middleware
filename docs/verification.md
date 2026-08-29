@@ -1,26 +1,26 @@
 # Verification evidence
 
-The release gate is reproducible from a clean checkout with `make check-all`.
+The release gate is reproducible from a clean checkout with `make ci`.
 No test requires a running database, proxy, cache, exporter, or other
 production service.
 
 | Evidence | Blocking command and acceptance |
 |---|---|
-| behavior and HTTP integration | `go test ./...` and `make integration`; all pass |
-| sibling interoperability | `make sibling-integration`; pinned router and service contracts pass |
-| race safety | `make race`; no race report |
-| meaningful coverage | `make coverage`; every production package is 100.0% |
-| fuzz smoke | `make fuzz`; every declared target completes without failure |
-| mutation | `make mutation`; 59/59 curated security decisions killed |
-| leaks | `make leak`; goleak reports no middleware-owned goroutine |
-| standards policies | `make standards`; proxy, CORS, content, compression, and headers pass |
+| behavior and HTTP integration | shared tests, race, and typed conformance gates; all pass |
+| sibling interoperability | typed interoperability operation; pinned router and service contracts pass |
+| race safety | shared race gate; no race report |
+| meaningful coverage | shared coverage gate; every production package is 100.0% |
+| fuzz smoke | declared typed fuzz operations; every target completes without failure |
+| mutation | shared mutation gate; 59/59 curated security decisions killed |
+| leaks | shared tests include the middleware leak contract; no middleware-owned goroutine |
+| standards policies | shared tests and typed conformance operation; proxy, CORS, content, compression, and headers pass |
 | response capabilities | real HTTP/1.1 and HTTP/2 plus nested interface matrix pass |
 | privacy | observation tests exclude payload data and bound all labels |
-| performance | `make benchmark`; latency and allocations are reported with parameters |
-| dependencies | `make vuln`, module update audit, and license review pass |
-| architecture | `make architecture`; no forbidden runtime mechanism or sibling dependency |
-| static quality | vet, lint, Staticcheck, actionlint, docs, API, tidy, and format pass |
-| advisory nil analysis | `make nilaway`; visible but intentionally non-blocking |
+| performance | shared benchmark gate; latency and allocations are reported with parameters |
+| dependencies | shared vulnerability, license, SBOM, and module checks pass |
+| architecture | shared safety and dependency checks; no forbidden runtime mechanism or sibling dependency |
+| static quality | shared vet, lint, Staticcheck, docs, API, tidy, and format checks pass |
+| advisory nil analysis | shared NilAway analysis; visible but intentionally non-blocking |
 
 Fuzzing covers descriptor names, request IDs, request body limits, forwarding
 fields, CORS origins and preflights, media negotiation, content coding, and
@@ -37,7 +37,7 @@ concurrency, and benchmark duration with any regression claim.
 
 ## Latest local release run
 
-On 2026-07-18, `make check-all` passed with Go 1.26.5 on Darwin arm64,
+On 2026-07-18, `make ci` passed with Go 1.26.5 on Darwin arm64,
 Apple M4 Max. It reported 100.0% production statement coverage, 59/59 killed
 mutants, eight two-second fuzz targets, no race, leak, vulnerability, lint,
 Staticcheck, API, documentation, architecture, or NilAway finding, and green

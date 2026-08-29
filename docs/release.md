@@ -1,6 +1,6 @@
 # Release process
 
-1. Run `make check-all` on a clean tree with Go 1.26.5.
+1. Run `make ci` on a clean tree with the declared Go version.
 2. Confirm architecture restrictions, 100.0% production coverage, all declared
    mutants killed, fuzz smoke, race, real HTTP integration, docs, API
    compatibility, lint, Staticcheck, and vulnerability checks.
