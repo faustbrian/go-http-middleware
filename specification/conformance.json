@@ -1,0 +1,320 @@
+{
+  "schema_version": 1,
+  "decisions": [
+    {
+      "id": "HTTPMIDDLEWARE-DEC-001",
+      "authoritative_sources": [
+        "go-http-source"
+      ],
+      "executable_evidence": [
+        "TestChainExecutesInDeclaredOrderAndUnwindsInReverse",
+        "TestExplicitDuplicateAndOrderingPoliciesAreInspectable",
+        "TestRecommendedStackHasExactRequestAndResponseOrder"
+      ],
+      "fixtures": [],
+      "fuzz": [
+        "FuzzDescriptorNames"
+      ],
+      "differential_evidence": [],
+      "differential_classification": "not assessed",
+      "public_behavior": [
+        "Descriptors are immutable and declared in request execution order; responses unwind in reverse, depth is bounded, and unapproved duplicates fail construction."
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-002",
+      "authoritative_sources": [
+        "rfc9110-source"
+      ],
+      "executable_evidence": [
+        "TestUntrustedInboundIdentifierIsReplacedAndPropagated",
+        "TestTrustedInvalidIdentifiersFollowNamedPolicy",
+        "TestConfigurationAndIdentifierBoundaries"
+      ],
+      "fixtures": [],
+      "fuzz": [
+        "FuzzInboundIdentifier"
+      ],
+      "differential_evidence": [],
+      "differential_classification": "not assessed",
+      "public_behavior": [
+        "Inbound identifiers are untrusted by default; explicitly trusted values must be one bounded printable ASCII value and invalid values follow named replace-or-reject policy."
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-003",
+      "authoritative_sources": [
+        "go-http-source"
+      ],
+      "executable_evidence": [
+        "TestRecoveryWritesSafeResponseAndObservesBoundedClass",
+        "TestRecoveryDoesNotRewriteCommittedResponse",
+        "TestRecoveryRepanicsAbortHandler",
+        "TestNilAndPanickingObserversCannotCorruptRecovery"
+      ],
+      "fixtures": [],
+      "fuzz": [],
+      "differential_evidence": [],
+      "differential_classification": "not assessed",
+      "public_behavior": [
+        "ErrAbortHandler is re-panicked; other panics are classified without exposing values, and committed output is never rewritten."
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-004",
+      "authoritative_sources": [
+        "rfc9110-source",
+        "go-http-source"
+      ],
+      "executable_evidence": [
+        "TestKnownOversizedBodyIsRejectedBeforeHandler",
+        "TestStreamingOverflowUsesStandardMaxBytesError",
+        "TestLimitCountsEncodedAndMultipartTransportBytes",
+        "TestLimitAppliesToUnreadBytesAndPreservesCancellation"
+      ],
+      "fixtures": [],
+      "fuzz": [
+        "FuzzBodyLimit"
+      ],
+      "differential_evidence": [],
+      "differential_classification": "not assessed",
+      "public_behavior": [
+        "The limit counts encoded transport bytes visible at middleware entry; known overflow receives 413 and streaming overflow remains a MaxBytesError."
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-005",
+      "authoritative_sources": [
+        "go-context-source",
+        "go-http-source"
+      ],
+      "executable_evidence": [
+        "TestDeadlineNeverExtendsParent",
+        "TestDeadlineCancelsContextIgnoringNoCodeInterruptionPromise",
+        "TestBufferedTimeoutReturnsSafeBoundedResponse",
+        "TestTimeoutBoundsContextIgnoringHandlers",
+        "TestRealTimeoutPreservesInformationalResponse"
+      ],
+      "fixtures": [],
+      "fuzz": [],
+      "differential_evidence": [],
+      "differential_classification": "not assessed",
+      "public_behavior": [
+        "Deadline middleware never extends a shorter parent; buffered timeout has explicit duration, output, worker, and capability bounds."
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-006",
+      "authoritative_sources": [
+        "rfc7239-source"
+      ],
+      "executable_evidence": [
+        "TestUntrustedPeerCannotInfluenceEffectiveInformation",
+        "TestTrustedProxySelectsFirstUntrustedClient",
+        "TestMalformedForwardingMetadataFailsEntireDecisionClosed",
+        "TestRFCForwardedMalformedMatrix",
+        "TestXForwardedMetadataTruthTable"
+      ],
+      "fixtures": [],
+      "fuzz": [
+        "FuzzForwardedField"
+      ],
+      "differential_evidence": [],
+      "differential_classification": "not assessed",
+      "public_behavior": [
+        "Direct socket data is the default; configured trusted peers enable one bounded syntax that walks inward and fails closed on malformed input."
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-007",
+      "authoritative_sources": [
+        "fetch-source",
+        "url-source"
+      ],
+      "executable_evidence": [
+        "TestCredentialedWildcardOriginIsRejected",
+        "TestSimpleOriginResponseAndVary",
+        "TestPreflightShortCircuitsWithValidatedMethodAndHeaders",
+        "TestPreflightTruthTable",
+        "TestCanonicalOriginLengthAndDefaultPortBounds"
+      ],
+      "fixtures": [],
+      "fuzz": [
+        "FuzzOriginAndPreflight"
+      ],
+      "differential_evidence": [],
+      "differential_classification": "not assessed",
+      "public_behavior": [
+        "Origins are canonicalized; credentialed wildcards are rejected; malformed and denied preflights fail, while accepted preflights default to bounded 204."
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-008",
+      "authoritative_sources": [
+        "rfc6797-source",
+        "rfc7034-source",
+        "referrer-policy-source"
+      ],
+      "executable_evidence": [
+        "TestAPIDefaultsApplyBeforeDownstreamResponses",
+        "TestHSTSRequiresDeploymentAcknowledgement",
+        "TestHSTSAndFixedHeadersUseFieldSpecificGrammar",
+        "TestReplaceReassertsHeadersAtCommit"
+      ],
+      "fixtures": [],
+      "fuzz": [
+        "FuzzConfiguredHeaderValues"
+      ],
+      "differential_evidence": [],
+      "differential_classification": "not assessed",
+      "public_behavior": [
+        "Defaults are explicit; HSTS requires acknowledgement; fields use named preserve-or-replace behavior; CSP and permissions policy remain opt-in."
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-009",
+      "authoritative_sources": [
+        "rfc9110-source",
+        "rfc9111-source"
+      ],
+      "executable_evidence": [
+        "TestGzipNegotiationHonorsQualityAndMergesVary",
+        "TestCompressionSkipsNoBodyHeadRangeAndAlreadyEncodedResponses",
+        "TestMiddlewareRejectsNoAcceptableCodingAndCompressesPastBuffer",
+        "TestTrailerDeclarationAndRepresentationFiltering",
+        "TestStreamingCompressionClosesEncoderOnPanic"
+      ],
+      "fixtures": [],
+      "fuzz": [
+        "FuzzAcceptEncoding"
+      ],
+      "differential_evidence": [],
+      "differential_classification": "not assessed",
+      "public_behavior": [
+        "Complete bounded Accept-Encoding negotiation is applied; unacceptable coding returns 406 and transformed responses remove identity-specific metadata."
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-010",
+      "authoritative_sources": [
+        "rfc9110-source"
+      ],
+      "executable_evidence": [
+        "TestUnsupportedRequestMediaTypeReturns415",
+        "TestMissingContentTypeIsAllowedOnlyForEmptyBodies",
+        "TestUnacceptableResponseTypeReturns406",
+        "TestDuplicateContentTypeIsRejected",
+        "TestAcceptBudgetsAccumulateAcrossHeaderLines"
+      ],
+      "fixtures": [],
+      "fuzz": [
+        "FuzzAcceptMediaTypes"
+      ],
+      "differential_evidence": [],
+      "differential_classification": "not assessed",
+      "public_behavior": [
+        "All bounded media fields are validated before matching; duplicate Content-Type is rejected and unsupported or unacceptable media returns 415 or 406."
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-011",
+      "authoritative_sources": [
+        "go-http-source"
+      ],
+      "executable_evidence": [
+        "TestTrackingWrappersPreserveExactOptionalInterfaces",
+        "TestNestedTransparentWrappersPreserveResponseControllerCapabilities",
+        "TestBufferedWrappersWithholdUnsupportedCapabilities",
+        "TestRealListenerHTTP1AndHTTP2PreserveFlushAndTrailers",
+        "TestRealHTTP1HijackSurvivesTrackingWrappers"
+      ],
+      "fixtures": [],
+      "fuzz": [],
+      "differential_evidence": [],
+      "differential_classification": "not assessed",
+      "public_behavior": [
+        "Transparent wrappers preserve exact underlying capabilities; buffering wrappers withhold unsupported streaming and upgrade capabilities."
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-012",
+      "authoritative_sources": [
+        "rfc9110-source"
+      ],
+      "executable_evidence": [
+        "TestObserverReceivesOneBoundedCompletionEvent",
+        "TestObserverIncludesOnlyBoundedInjectedClientClass",
+        "TestMetadataExtractorPanicIsContained",
+        "TestObserverSlownessIsSynchronousAndCreatesNoWorker",
+        "TestEventSchemaAndAllocationBudgets"
+      ],
+      "fixtures": [],
+      "fuzz": [],
+      "differential_evidence": [],
+      "differential_classification": "not assessed",
+      "public_behavior": [
+        "Observation emits one synchronous bounded event, excludes payloads and raw identifiers, and contains metadata-extractor panics."
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-013",
+      "authoritative_sources": [
+        "rfc9110-source"
+      ],
+      "executable_evidence": [
+        "TestImmediateAdmissionRejectsAboveLimitAndReleasesPermit",
+        "TestBoundedWaitHonorsCancellationWithoutLeakingPermit",
+        "TestShutdownReleasesWaitingRequestAndQueueStaysBounded",
+        "TestOverloadStormStaysBoundedAndRecovers",
+        "TestFiniteWaiterWaveMakesProgressWithoutOrderGuarantee"
+      ],
+      "fixtures": [],
+      "fuzz": [],
+      "differential_evidence": [],
+      "differential_classification": "not assessed",
+      "public_behavior": [
+        "Admission has explicit concurrency and waiter bounds, honors cancellation and shutdown, and emits only validated Retry-After guidance."
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-014",
+      "authoritative_sources": [
+        "rfc9111-source",
+        "rfc9110-source"
+      ],
+      "executable_evidence": [
+        "TestNoStoreAppliesToEveryDownstreamStatus",
+        "TestAdmissionStateShortCircuitsWithoutOwningHealthHandler",
+        "TestAdmissionConfigurationAndRetryAfterGrammar",
+        "TestAdmissionReadyAndRetryResponse"
+      ],
+      "fixtures": [],
+      "fuzz": [],
+      "differential_evidence": [],
+      "differential_classification": "not assessed",
+      "public_behavior": [
+        "NoStore applies to every downstream status; admission can short-circuit bounded maintenance responses but does not own health handlers."
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-015",
+      "authoritative_sources": [
+        "go-http-source"
+      ],
+      "executable_evidence": [
+        "TestGoServiceOwnershipRejectsDuplicateCoreMiddleware",
+        "TestOwningPackageConcernsComposeWithoutPolicyDuplication",
+        "TestOwnershipErrorAndInvalidConcerns",
+        "TestRepresentativeJSONRPCProfile",
+        "TestRepresentativeWebhookPreservesRawSignedBody"
+      ],
+      "fixtures": [],
+      "fuzz": [],
+      "differential_evidence": [],
+      "differential_classification": "not assessed",
+      "public_behavior": [
+        "This module owns generic HTTP mechanics only; sibling packages own domain concerns and adapters reject duplicate ownership."
+      ]
+    }
+  ]
+}

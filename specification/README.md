@@ -1,29 +1,28 @@
 # Specification conformance matrix
 
-`manifest.tsv` pins every normative source used by the HTTP middleware
-decision register. RFC sources use immutable RFC Editor text. Fetch, URL, and
-Referrer Policy use exact commits from their official standards repositories
-because their published specifications are living documents. The Go runtime
-contract uses the official Go 1.26.6 source archive. SHA-256 digests make
-source drift explicit.
+The [specification decision register](../docs/specification-decisions.md),
+`decisions.json`, `conformance.json`, `decision-history.json`, and
+`monitoring.json` define the auditable contract backed by `manifest.tsv`.
+The module claims only its documented public policy surface and delegates HTTP
+transport to Go.
 
-The canonical
-[`docs/specification-decisions.md`](../docs/specification-decisions.md)
-register records every material interpretation, consequence, and condition for
-reconsideration behind this conformance matrix.
+| Decision | Policy |
+|---|---|
+| `HTTPMIDDLEWARE-DEC-001` | Explicit composition order and duplicate ownership |
+| `HTTPMIDDLEWARE-DEC-002` | Request and correlation identifier trust |
+| `HTTPMIDDLEWARE-DEC-003` | Panic recovery after response commitment |
+| `HTTPMIDDLEWARE-DEC-004` | Request body limit accounting and ownership |
+| `HTTPMIDDLEWARE-DEC-005` | Deadlines versus buffered handler timeouts |
+| `HTTPMIDDLEWARE-DEC-006` | Forwarded fields and trusted-hop selection |
+| `HTTPMIDDLEWARE-DEC-007` | CORS origins, wildcards, and preflight ownership |
+| `HTTPMIDDLEWARE-DEC-008` | Security header policy and HSTS acknowledgement |
+| `HTTPMIDDLEWARE-DEC-009` | Content-coding negotiation and transformed metadata |
+| `HTTPMIDDLEWARE-DEC-010` | Request and response media negotiation |
+| `HTTPMIDDLEWARE-DEC-011` | ResponseWriter capabilities and commitment |
+| `HTTPMIDDLEWARE-DEC-012` | Completion observation and privacy |
+| `HTTPMIDDLEWARE-DEC-013` | Local admission, fairness, and retry guidance |
+| `HTTPMIDDLEWARE-DEC-014` | Cache and maintenance response policy |
+| `HTTPMIDDLEWARE-DEC-015` | Concern ownership and sibling integration |
 
-The module claims conformance only for behavior exposed by its public policy
-surface and linked executable evidence. It delegates HTTP framing and protocol
-transport to Go's `net/http`, does not implement browser enforcement, and does
-not claim complete Fetch compliance.
-
-Run the focused map and evidence check with:
-
-```console
-make check
-```
-
-For an update, download the exact manifest URL, verify provenance, calculate
-`shasum -a 256`, review errata and successor specifications, update affected
-decisions and tests, and then update the manifest. A digest change alone MUST
-NOT silently change behavior.
+Run `golib specification check` offline and add `--online` to verify reviewed
+authority content and change-monitor pins.

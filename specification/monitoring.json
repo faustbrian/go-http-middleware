@@ -1,0 +1,197 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-08-30",
+  "review_interval_days": 90,
+  "authorities": [
+    {
+      "id": "go-http-source",
+      "kind": "specification",
+      "version": "Go 1.26.6",
+      "url": "https://raw.githubusercontent.com/golang/go/go1.26.6/src/net/http/server.go",
+      "sha256": "ac720f2b48b30f6e1a58d125a08488c7849fd9723b5060d47d2304cde4de6a76",
+      "specifications": [
+        "Go 1.26.6 net/http and context contracts"
+      ]
+    },
+    {
+      "id": "go-context-source",
+      "kind": "specification",
+      "version": "Go 1.26.6",
+      "url": "https://raw.githubusercontent.com/golang/go/go1.26.6/src/context/context.go",
+      "sha256": "765f99f7cc0710b0117ffa183e432524f429c21496fcbad9b63fb9886fdbaac7",
+      "specifications": [
+        "Go 1.26.6 net/http and context contracts"
+      ]
+    },
+    {
+      "id": "go-releases",
+      "kind": "releases",
+      "version": "",
+      "url": "https://api.github.com/repos/golang/go/tags?per_page=1",
+      "sha256": "434001641bfe41d90aa82f81443ea577f0c5a28e5f0f97b96a4b0533d6edb1ba",
+      "specifications": [
+        "Go 1.26.6 net/http and context contracts"
+      ]
+    },
+    {
+      "id": "rfc9110-source",
+      "kind": "specification",
+      "version": "RFC 9110",
+      "url": "https://www.rfc-editor.org/rfc/rfc9110.txt",
+      "sha256": "21c1cdce6ab0e5509b04d84a28000836c7a087cf786efe6f04877ebfff47232a",
+      "specifications": [
+        "RFC 9110 HTTP Semantics"
+      ]
+    },
+    {
+      "id": "rfc9110-errata",
+      "kind": "errata",
+      "version": "",
+      "url": "https://errata.rfc-editor.org/search/?rfc_number=9110&presentation=records",
+      "sha256": "38bd006c96f8963d58573f704c5313a5f81968b90738c03ade0b036ec7bbdf4b",
+      "specifications": [
+        "RFC 9110 HTTP Semantics"
+      ]
+    },
+    {
+      "id": "rfc9111-source",
+      "kind": "specification",
+      "version": "RFC 9111",
+      "url": "https://www.rfc-editor.org/rfc/rfc9111.txt",
+      "sha256": "aeb52adb3279d5f23dae34f68af11bd5cef0a0aff7ffcd014c9ca93c5302cf3e",
+      "specifications": [
+        "RFC 9111 HTTP Caching"
+      ]
+    },
+    {
+      "id": "rfc9111-errata",
+      "kind": "errata",
+      "version": "",
+      "url": "https://errata.rfc-editor.org/search/?rfc_number=9111&presentation=records",
+      "sha256": "62a3ca9503a1ce4ec50c9d9da58a08a06060a36f72b796d1aedb6c757507863d",
+      "specifications": [
+        "RFC 9111 HTTP Caching"
+      ]
+    },
+    {
+      "id": "rfc7239-source",
+      "kind": "specification",
+      "version": "RFC 7239",
+      "url": "https://www.rfc-editor.org/rfc/rfc7239.txt",
+      "sha256": "f15c45c9e079684bc4284d041be63285923962448cb0d8540d54106c68c2a40d",
+      "specifications": [
+        "RFC 7239 Forwarded HTTP Extension"
+      ]
+    },
+    {
+      "id": "rfc7239-errata",
+      "kind": "errata",
+      "version": "",
+      "url": "https://errata.rfc-editor.org/search/?rfc_number=7239&presentation=records",
+      "sha256": "37fe078cc6a4600f300a09e010d57e674bcc3d9c85fb28a01f07a88d38822138",
+      "specifications": [
+        "RFC 7239 Forwarded HTTP Extension"
+      ]
+    },
+    {
+      "id": "rfc6797-source",
+      "kind": "specification",
+      "version": "RFC 6797",
+      "url": "https://www.rfc-editor.org/rfc/rfc6797.txt",
+      "sha256": "7cefa03f77547532580b7f877b4e6388bb66c20631b624667a0065c14ae3d364",
+      "specifications": [
+        "RFC 6797 HTTP Strict Transport Security"
+      ]
+    },
+    {
+      "id": "rfc6797-errata",
+      "kind": "errata",
+      "version": "",
+      "url": "https://errata.rfc-editor.org/search/?rfc_number=6797&presentation=records",
+      "sha256": "f451699497f5f8695152a0193f199760978140e1f4c6826818197907ca588259",
+      "specifications": [
+        "RFC 6797 HTTP Strict Transport Security"
+      ]
+    },
+    {
+      "id": "rfc7034-source",
+      "kind": "specification",
+      "version": "RFC 7034",
+      "url": "https://www.rfc-editor.org/rfc/rfc7034.txt",
+      "sha256": "e6ab403a2e672c67507542f62c1705284d8c6ae41a6a90adc850cfb845faa9de",
+      "specifications": [
+        "RFC 7034 X-Frame-Options"
+      ]
+    },
+    {
+      "id": "rfc7034-errata",
+      "kind": "errata",
+      "version": "",
+      "url": "https://errata.rfc-editor.org/search/?rfc_number=7034&presentation=records",
+      "sha256": "bf94cf59f4cc5816a54930b120141274e88321cd29a1fbae33680e6d62f9757d",
+      "specifications": [
+        "RFC 7034 X-Frame-Options"
+      ]
+    },
+    {
+      "id": "fetch-source",
+      "kind": "specification",
+      "version": "WHATWG Fetch 586cd2a44c2a",
+      "url": "https://raw.githubusercontent.com/whatwg/fetch/586cd2a44c2a865b37c166dc0740f3fb8bb220d6/fetch.bs",
+      "sha256": "2099e5170175b36f61ab3234849c429702552d3587d50b87149269336977eb98",
+      "specifications": [
+        "WHATWG Fetch CORS protocol at 586cd2a44c2a"
+      ]
+    },
+    {
+      "id": "fetch-releases",
+      "kind": "releases",
+      "version": "",
+      "url": "https://api.github.com/repos/whatwg/fetch/commits?path=fetch.bs&per_page=1",
+      "sha256": "cdfa5e2aee36d0d2bb7f004c961592ca58203fc24b67d35425bba6983f0729d6",
+      "specifications": [
+        "WHATWG Fetch CORS protocol at 586cd2a44c2a"
+      ]
+    },
+    {
+      "id": "url-source",
+      "kind": "specification",
+      "version": "WHATWG URL 9dc3827fc722",
+      "url": "https://raw.githubusercontent.com/whatwg/url/9dc3827fc722ac4af3f11061aa3e9adb44a17c8b/url.bs",
+      "sha256": "53a7e67492328bf5dd7bbf20ba6edd8aa26790da3a3c9a1a6ac818b33257001d",
+      "specifications": [
+        "WHATWG URL origin model at 9dc3827fc722"
+      ]
+    },
+    {
+      "id": "url-releases",
+      "kind": "releases",
+      "version": "",
+      "url": "https://api.github.com/repos/whatwg/url/commits?path=url.bs&per_page=1",
+      "sha256": "ebdca1fd738c36d6df4d15dd25f478deb006f0b790e795d213d6f8b6e3975204",
+      "specifications": [
+        "WHATWG URL origin model at 9dc3827fc722"
+      ]
+    },
+    {
+      "id": "referrer-policy-source",
+      "kind": "recommendation",
+      "version": "W3C Referrer Policy cc435b05ca4a",
+      "url": "https://raw.githubusercontent.com/w3c/webappsec-referrer-policy/cc435b05ca4a94f7f1a139be5074b168d20014db/index.src.html",
+      "sha256": "a277e78e06418ec60afc6f499aee79d4f3a3a067e0fd97e9886a2d9e3de95eb1",
+      "specifications": [
+        "W3C Referrer Policy at cc435b05ca4a"
+      ]
+    },
+    {
+      "id": "referrer-policy-releases",
+      "kind": "releases",
+      "version": "",
+      "url": "https://api.github.com/repos/w3c/webappsec-referrer-policy/commits?path=index.src.html&per_page=1",
+      "sha256": "de4c10be396e7e7fb8c034be3c3471f3f8a29b21626f69b02ec1a206178669c7",
+      "specifications": [
+        "W3C Referrer Policy at cc435b05ca4a"
+      ]
+    }
+  ]
+}

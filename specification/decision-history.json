@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {
+      "id": "HTTPMIDDLEWARE-DEC-001",
+      "digests": [
+        "ac7f1a971688a278debc11526319e41b5a9fde65029e5b8116af94031774f7cf"
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-002",
+      "digests": [
+        "32f235a5b6904cc389028f57d64710f05dd8d16bef4682b801dfa9df18801c98"
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-003",
+      "digests": [
+        "5ca1bec6225929c7a25aff601ed17148960bac465df08c83a1364caaeb77abf1"
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-004",
+      "digests": [
+        "1061435c5c0169974df8f7a816a4e93816e09430c71c96d9bb4069917ece6907"
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-005",
+      "digests": [
+        "116bfc4a2fd0cf94a9a51251a6b86e4270629e82489a6a886369489e9664bb91"
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-006",
+      "digests": [
+        "b9e73bafaf90c1f517c1f45473f4eac1ec3f622633078ed3714622b07c4fd6ec"
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-007",
+      "digests": [
+        "5d0330131bfae527456e203b65aadbd9559545b85e5b14cf43160ddaab7ccee8"
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-008",
+      "digests": [
+        "42307e67ed4072251057a97cfd61d7d453fb163bfdf6a7788be9ca38e3d0768b"
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-009",
+      "digests": [
+        "e66a0435f1e69599c8c58147fe405093e506a8570f9f6f4475d0b996ac89415d"
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-010",
+      "digests": [
+        "e6c3cb35526dd48a121e5180f3e2a30d67adb5bcae9e0e6861de2aeb5fa2d786"
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-011",
+      "digests": [
+        "0450178874719bd880e705596c8f2bfcc64cc8a725cdc8098592d31ad9be93e9"
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-012",
+      "digests": [
+        "477e63e3c48ef6087dfb88d593bb0be02be5cc556940f8edf9b2e3c76082098c"
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-013",
+      "digests": [
+        "c56c51381ab6f0bb613c2a31f3e0bb00ee0bceeaf4c7944a5a014ac3e1084da3"
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-014",
+      "digests": [
+        "5b857207fd48f586341935eebc2aeac2c8c7e930f280df330d72d4f83d3a5717"
+      ]
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-015",
+      "digests": [
+        "100f655f802a18504974028f22573999f0e4157485641054fe456f4c0ed9d4d7"
+      ]
+    }
+  ]
+}

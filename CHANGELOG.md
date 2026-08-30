@@ -6,10 +6,33 @@ This project follows Semantic Versioning and Keep a Changelog.
 
 ### Changed
 
-- Replace copied repository verification tooling with the pinned
-  `go-library-tools` v1.0.13 contract while preserving the API baseline,
-  mutation checkpoints, HTTP conformance tests, sibling integration harness,
-  and package fixtures.
+- Publish the machine-auditable [specification decision register](docs/specification-decisions.md)
+  with authority monitoring, conformance bindings, and durable decision
+  history for the HTTP middleware policy surface.
+
+Current specification decision content:
+
+- HTTPMIDDLEWARE-DEC-001 sha256:ac7f1a971688a278debc11526319e41b5a9fde65029e5b8116af94031774f7cf
+- HTTPMIDDLEWARE-DEC-002 sha256:32f235a5b6904cc389028f57d64710f05dd8d16bef4682b801dfa9df18801c98
+- HTTPMIDDLEWARE-DEC-003 sha256:5ca1bec6225929c7a25aff601ed17148960bac465df08c83a1364caaeb77abf1
+- HTTPMIDDLEWARE-DEC-004 sha256:1061435c5c0169974df8f7a816a4e93816e09430c71c96d9bb4069917ece6907
+- HTTPMIDDLEWARE-DEC-005 sha256:116bfc4a2fd0cf94a9a51251a6b86e4270629e82489a6a886369489e9664bb91
+- HTTPMIDDLEWARE-DEC-006 sha256:b9e73bafaf90c1f517c1f45473f4eac1ec3f622633078ed3714622b07c4fd6ec
+- HTTPMIDDLEWARE-DEC-007 sha256:5d0330131bfae527456e203b65aadbd9559545b85e5b14cf43160ddaab7ccee8
+- HTTPMIDDLEWARE-DEC-008 sha256:42307e67ed4072251057a97cfd61d7d453fb163bfdf6a7788be9ca38e3d0768b
+- HTTPMIDDLEWARE-DEC-009 sha256:e66a0435f1e69599c8c58147fe405093e506a8570f9f6f4475d0b996ac89415d
+- HTTPMIDDLEWARE-DEC-010 sha256:e6c3cb35526dd48a121e5180f3e2a30d67adb5bcae9e0e6861de2aeb5fa2d786
+- HTTPMIDDLEWARE-DEC-011 sha256:0450178874719bd880e705596c8f2bfcc64cc8a725cdc8098592d31ad9be93e9
+- HTTPMIDDLEWARE-DEC-012 sha256:477e63e3c48ef6087dfb88d593bb0be02be5cc556940f8edf9b2e3c76082098c
+- HTTPMIDDLEWARE-DEC-013 sha256:c56c51381ab6f0bb613c2a31f3e0bb00ee0bceeaf4c7944a5a014ac3e1084da3
+- HTTPMIDDLEWARE-DEC-014 sha256:5b857207fd48f586341935eebc2aeac2c8c7e930f280df330d72d4f83d3a5717
+- HTTPMIDDLEWARE-DEC-015 sha256:100f655f802a18504974028f22573999f0e4157485641054fe456f4c0ed9d4d7
+
+- Replace copied repository verification tooling with the released
+  `go-library-tools` v1.0.13 configuration and canonical workflow commit
+  `3367371735ac409ba101778aafbdaf8e2560064c` while preserving the API
+  baseline, mutation checkpoints, HTTP conformance tests, sibling integration
+  harness, and package fixtures.
 
 ### Documentation
 
