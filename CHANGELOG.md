@@ -28,11 +28,10 @@ Current specification decision content:
 - HTTPMIDDLEWARE-DEC-014 sha256:5b857207fd48f586341935eebc2aeac2c8c7e930f280df330d72d4f83d3a5717
 - HTTPMIDDLEWARE-DEC-015 sha256:100f655f802a18504974028f22573999f0e4157485641054fe456f4c0ed9d4d7
 
-- Replace copied repository verification tooling with the released
-  `go-library-tools` v1.0.13 configuration and canonical workflow commit
-  `3367371735ac409ba101778aafbdaf8e2560064c` while preserving the API
-  baseline, mutation checkpoints, HTTP conformance tests, sibling integration
-  harness, and package fixtures.
+- Adopt the checksum-verified `go-library-tools` v1.2.0 CLI and immutable
+  shared workflow so local and hosted gates enforce specification governance
+  while preserving the API baseline, mutation checkpoints, HTTP conformance
+  tests, sibling integration harness, and package fixtures.
 
 ### Documentation
 
