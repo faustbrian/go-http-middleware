@@ -1,0 +1,691 @@
+{
+  "schema_version": 1,
+  "change_control": {
+    "readme": "README.md",
+    "conformance": "specification/README.md",
+    "compatibility": "docs/compatibility.md",
+    "contribution": "CONTRIBUTING.md",
+    "changelog": "CHANGELOG.md",
+    "pull_request_template": ".github/pull_request_template.md"
+  },
+  "decisions": [
+    {
+      "id": "HTTPMIDDLEWARE-DEC-001",
+      "title": "Explicit composition order and duplicate ownership",
+      "status": "resolved",
+      "owner": "http-middleware maintainers",
+      "classification": "omission",
+      "decision_scope": "application-policy",
+      "specification": "Go 1.26.6 net/http and context contracts",
+      "version": "Go 1.26.6",
+      "source_authority": "go-http-source",
+      "section": "net/http.Handler composition",
+      "requirement_strength": "not specified",
+      "issue": "Go does not define middleware declaration order or duplicate concern ownership.",
+      "interpretations": [
+        "Declare request order.",
+        "Declare wrapping order or allow duplicates."
+      ],
+      "peer_behavior": "No maintained peer differential result is recorded; peer behavior is not assessed.",
+      "selected_behavior": "Descriptors are immutable and declared in request execution order; responses unwind in reverse, depth is bounded, and unapproved duplicates fail construction.",
+      "rationale": "The selected behavior makes the package boundary explicit and testable.",
+      "security_consequences": "The policy fails closed at untrusted or ambiguous boundaries.",
+      "resource_consequences": "Configured limits keep work and retained state bounded.",
+      "compatibility_consequences": "Changing this selected behavior requires compatibility and changelog review.",
+      "wire_consequences": "Only the documented HTTP fields, status, or response behavior can change.",
+      "executable_evidence": [
+        "TestChainExecutesInDeclaredOrderAndUnwindsInReverse",
+        "TestExplicitDuplicateAndOrderingPoliciesAreInspectable",
+        "TestRecommendedStackHasExactRequestAndResponseOrder"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [
+        "FuzzDescriptorNames"
+      ],
+      "interoperability_evidence": [],
+      "public_apis": [
+        "Chain",
+        "Descriptor",
+        "When"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md"
+      ],
+      "upstream_status": "No current upstream issue or erratum is linked for this policy.",
+      "reconsider_when": "Go adopts a standard middleware composition contract."
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-002",
+      "title": "Request and correlation identifier trust",
+      "status": "resolved",
+      "owner": "http-middleware maintainers",
+      "classification": "omission",
+      "decision_scope": "defensive",
+      "specification": "RFC 9110 HTTP Semantics",
+      "version": "RFC 9110",
+      "source_authority": "rfc9110-source",
+      "section": "Sections 5 through 6",
+      "requirement_strength": "not specified",
+      "issue": "RFC 9110 does not define request or correlation identifier syntax, trust, uniqueness, or propagation.",
+      "interpretations": [
+        "Trust inbound identifiers.",
+        "Replace or reject invalid trusted identifiers."
+      ],
+      "peer_behavior": "No maintained peer differential result is recorded; peer behavior is not assessed.",
+      "selected_behavior": "Inbound identifiers are untrusted by default; explicitly trusted values must be one bounded printable ASCII value and invalid values follow named replace-or-reject policy.",
+      "rationale": "The selected behavior makes the package boundary explicit and testable.",
+      "security_consequences": "The policy fails closed at untrusted or ambiguous boundaries.",
+      "resource_consequences": "Configured limits keep work and retained state bounded.",
+      "compatibility_consequences": "Changing this selected behavior requires compatibility and changelog review.",
+      "wire_consequences": "Only the documented HTTP fields, status, or response behavior can change.",
+      "executable_evidence": [
+        "TestUntrustedInboundIdentifierIsReplacedAndPropagated",
+        "TestTrustedInvalidIdentifiersFollowNamedPolicy",
+        "TestConfigurationAndIdentifierBoundaries"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [
+        "FuzzInboundIdentifier"
+      ],
+      "interoperability_evidence": [],
+      "public_apis": [
+        "requestid.Policy",
+        "requestid.New",
+        "requestid.FromContext"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md"
+      ],
+      "upstream_status": "No current upstream issue or erratum is linked for this policy.",
+      "reconsider_when": "An adopted standard defines compatible identifier trust semantics."
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-003",
+      "title": "Panic recovery after response commitment",
+      "status": "resolved",
+      "owner": "http-middleware maintainers",
+      "classification": "omission",
+      "decision_scope": "defensive",
+      "specification": "Go 1.26.6 net/http and context contracts",
+      "version": "Go 1.26.6",
+      "source_authority": "go-http-source",
+      "section": "net/http panic and commitment behavior",
+      "requirement_strength": "not specified",
+      "issue": "Go does not define reusable middleware error bodies, observer data, or rewriting after commitment.",
+      "interpretations": [
+        "Recover every panic.",
+        "Re-panic or emit a safe response only before commitment."
+      ],
+      "peer_behavior": "No maintained peer differential result is recorded; peer behavior is not assessed.",
+      "selected_behavior": "ErrAbortHandler is re-panicked; other panics are classified without exposing values, and committed output is never rewritten.",
+      "rationale": "The selected behavior makes the package boundary explicit and testable.",
+      "security_consequences": "The policy fails closed at untrusted or ambiguous boundaries.",
+      "resource_consequences": "Configured limits keep work and retained state bounded.",
+      "compatibility_consequences": "Changing this selected behavior requires compatibility and changelog review.",
+      "wire_consequences": "Only the documented HTTP fields, status, or response behavior can change.",
+      "executable_evidence": [
+        "TestRecoveryWritesSafeResponseAndObservesBoundedClass",
+        "TestRecoveryDoesNotRewriteCommittedResponse",
+        "TestRecoveryRepanicsAbortHandler",
+        "TestNilAndPanickingObserversCannotCorruptRecovery"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [],
+      "interoperability_evidence": [],
+      "public_apis": [
+        "recovery.Policy",
+        "recovery.New"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md"
+      ],
+      "upstream_status": "No current upstream issue or erratum is linked for this policy.",
+      "reconsider_when": "Go changes panic propagation or response commitment semantics."
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-004",
+      "title": "Request body limit accounting and ownership",
+      "status": "resolved",
+      "owner": "http-middleware maintainers",
+      "classification": "omission",
+      "decision_scope": "defensive",
+      "specification": "RFC 9110 HTTP Semantics",
+      "version": "RFC 9110",
+      "source_authority": "rfc9110-source",
+      "section": "Section 6.4",
+      "requirement_strength": "not specified",
+      "issue": "HTTP does not define whether generic middleware counts decoded bytes, transport bytes, or bytes consumed before installation.",
+      "interpretations": [
+        "Count decoded bytes.",
+        "Count encoded bytes visible at middleware entry."
+      ],
+      "peer_behavior": "No maintained peer differential result is recorded; peer behavior is not assessed.",
+      "selected_behavior": "The limit counts encoded transport bytes visible at middleware entry; known overflow receives 413 and streaming overflow remains a MaxBytesError.",
+      "rationale": "The selected behavior makes the package boundary explicit and testable.",
+      "security_consequences": "The policy fails closed at untrusted or ambiguous boundaries.",
+      "resource_consequences": "Configured limits keep work and retained state bounded.",
+      "compatibility_consequences": "Changing this selected behavior requires compatibility and changelog review.",
+      "wire_consequences": "Only the documented HTTP fields, status, or response behavior can change.",
+      "executable_evidence": [
+        "TestKnownOversizedBodyIsRejectedBeforeHandler",
+        "TestStreamingOverflowUsesStandardMaxBytesError",
+        "TestLimitCountsEncodedAndMultipartTransportBytes",
+        "TestLimitAppliesToUnreadBytesAndPreservesCancellation"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [
+        "FuzzBodyLimit"
+      ],
+      "interoperability_evidence": [],
+      "public_apis": [
+        "bodylimit.Policy",
+        "bodylimit.New"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md"
+      ],
+      "upstream_status": "No current upstream issue or erratum is linked for this policy.",
+      "reconsider_when": "Go exposes reliable whole-request accounting at this boundary."
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-005",
+      "title": "Deadlines versus buffered handler timeouts",
+      "status": "resolved",
+      "owner": "http-middleware maintainers",
+      "classification": "omission",
+      "decision_scope": "defensive",
+      "specification": "Go 1.26.6 net/http and context contracts",
+      "version": "Go 1.26.6",
+      "source_authority": "go-context-source",
+      "section": "context deadlines and net/http execution",
+      "requirement_strength": "not specified",
+      "issue": "Context cancellation does not interrupt handler code, while early timeout responses require buffering or concurrency.",
+      "interpretations": [
+        "Attach only a deadline.",
+        "Expose separate bounded deadline and buffered-timeout contracts."
+      ],
+      "peer_behavior": "No maintained peer differential result is recorded; peer behavior is not assessed.",
+      "selected_behavior": "Deadline middleware never extends a shorter parent; buffered timeout has explicit duration, output, worker, and capability bounds.",
+      "rationale": "The selected behavior makes the package boundary explicit and testable.",
+      "security_consequences": "The policy fails closed at untrusted or ambiguous boundaries.",
+      "resource_consequences": "Configured limits keep work and retained state bounded.",
+      "compatibility_consequences": "Changing this selected behavior requires compatibility and changelog review.",
+      "wire_consequences": "Only the documented HTTP fields, status, or response behavior can change.",
+      "executable_evidence": [
+        "TestDeadlineNeverExtendsParent",
+        "TestDeadlineCancelsContextIgnoringNoCodeInterruptionPromise",
+        "TestBufferedTimeoutReturnsSafeBoundedResponse",
+        "TestTimeoutBoundsContextIgnoringHandlers",
+        "TestRealTimeoutPreservesInformationalResponse"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [],
+      "interoperability_evidence": [],
+      "public_apis": [
+        "deadline.New",
+        "deadline.NewTimeout"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md"
+      ],
+      "upstream_status": "No current upstream issue or erratum is linked for this policy.",
+      "reconsider_when": "Go provides safe handler interruption or an equivalent bounded primitive."
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-006",
+      "title": "Forwarded fields and trusted-hop selection",
+      "status": "resolved",
+      "owner": "http-middleware maintainers",
+      "classification": "ambiguity",
+      "decision_scope": "defensive",
+      "specification": "RFC 7239 Forwarded HTTP Extension",
+      "version": "RFC 7239",
+      "source_authority": "rfc7239-source",
+      "section": "Sections 4, 6, and 8",
+      "requirement_strength": "not specified",
+      "issue": "RFC 7239 defines field syntax but does not make client-supplied forwarding chains trustworthy.",
+      "interpretations": [
+        "Trust the leftmost value.",
+        "Walk inward from an explicitly trusted direct peer."
+      ],
+      "peer_behavior": "No maintained peer differential result is recorded; peer behavior is not assessed.",
+      "selected_behavior": "Direct socket data is the default; configured trusted peers enable one bounded syntax that walks inward and fails closed on malformed input.",
+      "rationale": "The selected behavior makes the package boundary explicit and testable.",
+      "security_consequences": "The policy fails closed at untrusted or ambiguous boundaries.",
+      "resource_consequences": "Configured limits keep work and retained state bounded.",
+      "compatibility_consequences": "Changing this selected behavior requires compatibility and changelog review.",
+      "wire_consequences": "Only the documented HTTP fields, status, or response behavior can change.",
+      "executable_evidence": [
+        "TestUntrustedPeerCannotInfluenceEffectiveInformation",
+        "TestTrustedProxySelectsFirstUntrustedClient",
+        "TestMalformedForwardingMetadataFailsEntireDecisionClosed",
+        "TestRFCForwardedMalformedMatrix",
+        "TestXForwardedMetadataTruthTable"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [
+        "FuzzForwardedField"
+      ],
+      "interoperability_evidence": [],
+      "public_apis": [
+        "proxy.Policy",
+        "proxy.Info",
+        "proxy.New",
+        "proxy.FromContext"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md"
+      ],
+      "upstream_status": "No current upstream issue or erratum is linked for this policy.",
+      "reconsider_when": "A standardized forwarding deployment profile is adopted."
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-007",
+      "title": "CORS origins, wildcards, and preflight ownership",
+      "status": "resolved",
+      "owner": "http-middleware maintainers",
+      "classification": "optional behavior",
+      "decision_scope": "application-policy",
+      "specification": "WHATWG Fetch CORS protocol at 586cd2a44c2a",
+      "version": "WHATWG Fetch 586cd2a44c2a",
+      "source_authority": "fetch-source",
+      "section": "CORS protocol and preflight fetch",
+      "requirement_strength": "not specified",
+      "issue": "Fetch leaves server allowlists, malformed-request behavior, extensions, and preflight routing to application policy.",
+      "interpretations": [
+        "Reflect any origin.",
+        "Canonicalize origins and require explicit allow policy."
+      ],
+      "peer_behavior": "No maintained peer differential result is recorded; peer behavior is not assessed.",
+      "selected_behavior": "Origins are canonicalized; credentialed wildcards are rejected; malformed and denied preflights fail, while accepted preflights default to bounded 204.",
+      "rationale": "The selected behavior makes the package boundary explicit and testable.",
+      "security_consequences": "The policy fails closed at untrusted or ambiguous boundaries.",
+      "resource_consequences": "Configured limits keep work and retained state bounded.",
+      "compatibility_consequences": "Changing this selected behavior requires compatibility and changelog review.",
+      "wire_consequences": "Only the documented HTTP fields, status, or response behavior can change.",
+      "executable_evidence": [
+        "TestCredentialedWildcardOriginIsRejected",
+        "TestSimpleOriginResponseAndVary",
+        "TestPreflightShortCircuitsWithValidatedMethodAndHeaders",
+        "TestPreflightTruthTable",
+        "TestCanonicalOriginLengthAndDefaultPortBounds"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [
+        "FuzzOriginAndPreflight"
+      ],
+      "interoperability_evidence": [],
+      "public_apis": [
+        "cors.Policy",
+        "cors.New"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md"
+      ],
+      "upstream_status": "No current upstream issue or erratum is linked for this policy.",
+      "reconsider_when": "Pinned Fetch or URL algorithms change."
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-008",
+      "title": "Security header policy and HSTS acknowledgement",
+      "status": "resolved",
+      "owner": "http-middleware maintainers",
+      "classification": "optional behavior",
+      "decision_scope": "application-policy",
+      "specification": "RFC 6797 HTTP Strict Transport Security",
+      "version": "RFC 6797",
+      "source_authority": "rfc6797-source",
+      "section": "Sections 6 through 8",
+      "requirement_strength": "not specified",
+      "issue": "Header specifications cannot determine deployment HTTPS readiness or application-specific security policy.",
+      "interpretations": [
+        "Enable common headers implicitly.",
+        "Require explicit field policy and HSTS acknowledgement."
+      ],
+      "peer_behavior": "No maintained peer differential result is recorded; peer behavior is not assessed.",
+      "selected_behavior": "Defaults are explicit; HSTS requires acknowledgement; fields use named preserve-or-replace behavior; CSP and permissions policy remain opt-in.",
+      "rationale": "The selected behavior makes the package boundary explicit and testable.",
+      "security_consequences": "The policy fails closed at untrusted or ambiguous boundaries.",
+      "resource_consequences": "Configured limits keep work and retained state bounded.",
+      "compatibility_consequences": "Changing this selected behavior requires compatibility and changelog review.",
+      "wire_consequences": "Only the documented HTTP fields, status, or response behavior can change.",
+      "executable_evidence": [
+        "TestAPIDefaultsApplyBeforeDownstreamResponses",
+        "TestHSTSRequiresDeploymentAcknowledgement",
+        "TestHSTSAndFixedHeadersUseFieldSpecificGrammar",
+        "TestReplaceReassertsHeadersAtCommit"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [
+        "FuzzConfiguredHeaderValues"
+      ],
+      "interoperability_evidence": [],
+      "public_apis": [
+        "secureheader.Policy",
+        "secureheader.APIDefaults",
+        "secureheader.New"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md"
+      ],
+      "upstream_status": "No current upstream issue or erratum is linked for this policy.",
+      "reconsider_when": "A supported field is standardized, obsoleted, or changes browser semantics."
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-009",
+      "title": "Content-coding negotiation and transformed metadata",
+      "status": "resolved",
+      "owner": "http-middleware maintainers",
+      "classification": "optional behavior",
+      "decision_scope": "application-policy",
+      "specification": "RFC 9110 HTTP Semantics",
+      "version": "RFC 9110",
+      "source_authority": "rfc9110-source",
+      "section": "Sections 8 and 12.5.3",
+      "requirement_strength": "not specified",
+      "issue": "HTTP does not define buffering thresholds, retained transformed metadata, encoder ownership, or sensitive-compression policy.",
+      "interpretations": [
+        "Compress whenever gzip appears.",
+        "Apply complete negotiation and remove stale metadata."
+      ],
+      "peer_behavior": "No maintained peer differential result is recorded; peer behavior is not assessed.",
+      "selected_behavior": "Complete bounded Accept-Encoding negotiation is applied; unacceptable coding returns 406 and transformed responses remove identity-specific metadata.",
+      "rationale": "The selected behavior makes the package boundary explicit and testable.",
+      "security_consequences": "The policy fails closed at untrusted or ambiguous boundaries.",
+      "resource_consequences": "Configured limits keep work and retained state bounded.",
+      "compatibility_consequences": "Changing this selected behavior requires compatibility and changelog review.",
+      "wire_consequences": "Only the documented HTTP fields, status, or response behavior can change.",
+      "executable_evidence": [
+        "TestGzipNegotiationHonorsQualityAndMergesVary",
+        "TestCompressionSkipsNoBodyHeadRangeAndAlreadyEncodedResponses",
+        "TestMiddlewareRejectsNoAcceptableCodingAndCompressesPastBuffer",
+        "TestTrailerDeclarationAndRepresentationFiltering",
+        "TestStreamingCompressionClosesEncoderOnPanic"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [
+        "FuzzAcceptEncoding"
+      ],
+      "interoperability_evidence": [],
+      "public_apis": [
+        "compress.Policy",
+        "compress.NewGzip"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md"
+      ],
+      "upstream_status": "No current upstream issue or erratum is linked for this policy.",
+      "reconsider_when": "Additional codecs or HTTP validator semantics change."
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-010",
+      "title": "Request and response media negotiation",
+      "status": "resolved",
+      "owner": "http-middleware maintainers",
+      "classification": "optional behavior",
+      "decision_scope": "application-policy",
+      "specification": "RFC 9110 HTTP Semantics",
+      "version": "RFC 9110",
+      "source_authority": "rfc9110-source",
+      "section": "Sections 8.3 and 12.5.1",
+      "requirement_strength": "not specified",
+      "issue": "HTTP does not select application media or require rejection of duplicate singular fields and malformed irrelevant tails.",
+      "interpretations": [
+        "Accept the first valid value.",
+        "Validate the complete bounded field set before matching."
+      ],
+      "peer_behavior": "No maintained peer differential result is recorded; peer behavior is not assessed.",
+      "selected_behavior": "All bounded media fields are validated before matching; duplicate Content-Type is rejected and unsupported or unacceptable media returns 415 or 406.",
+      "rationale": "The selected behavior makes the package boundary explicit and testable.",
+      "security_consequences": "The policy fails closed at untrusted or ambiguous boundaries.",
+      "resource_consequences": "Configured limits keep work and retained state bounded.",
+      "compatibility_consequences": "Changing this selected behavior requires compatibility and changelog review.",
+      "wire_consequences": "Only the documented HTTP fields, status, or response behavior can change.",
+      "executable_evidence": [
+        "TestUnsupportedRequestMediaTypeReturns415",
+        "TestMissingContentTypeIsAllowedOnlyForEmptyBodies",
+        "TestUnacceptableResponseTypeReturns406",
+        "TestDuplicateContentTypeIsRejected",
+        "TestAcceptBudgetsAccumulateAcrossHeaderLines"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [
+        "FuzzAcceptMediaTypes"
+      ],
+      "interoperability_evidence": [],
+      "public_apis": [
+        "content.Policy",
+        "content.New"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md"
+      ],
+      "upstream_status": "No current upstream issue or erratum is linked for this policy.",
+      "reconsider_when": "Protocol-specific media selection moves to an owning package."
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-011",
+      "title": "ResponseWriter capabilities and commitment",
+      "status": "resolved",
+      "owner": "http-middleware maintainers",
+      "classification": "implementation-defined behavior",
+      "decision_scope": "transport-specific",
+      "specification": "Go 1.26.6 net/http and context contracts",
+      "version": "Go 1.26.6",
+      "source_authority": "go-http-source",
+      "section": "ResponseWriter optional interfaces",
+      "requirement_strength": "not specified",
+      "issue": "Wrappers can advertise optional interfaces they cannot honor or hide interfaces they can preserve.",
+      "interpretations": [
+        "Expose every optional interface.",
+        "Expose exactly the capabilities each wrapper can honor."
+      ],
+      "peer_behavior": "No maintained peer differential result is recorded; peer behavior is not assessed.",
+      "selected_behavior": "Transparent wrappers preserve exact underlying capabilities; buffering wrappers withhold unsupported streaming and upgrade capabilities.",
+      "rationale": "The selected behavior makes the package boundary explicit and testable.",
+      "security_consequences": "The policy fails closed at untrusted or ambiguous boundaries.",
+      "resource_consequences": "Configured limits keep work and retained state bounded.",
+      "compatibility_consequences": "Changing this selected behavior requires compatibility and changelog review.",
+      "wire_consequences": "Only the documented HTTP fields, status, or response behavior can change.",
+      "executable_evidence": [
+        "TestTrackingWrappersPreserveExactOptionalInterfaces",
+        "TestNestedTransparentWrappersPreserveResponseControllerCapabilities",
+        "TestBufferedWrappersWithholdUnsupportedCapabilities",
+        "TestRealListenerHTTP1AndHTTP2PreserveFlushAndTrailers",
+        "TestRealHTTP1HijackSurvivesTrackingWrappers"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [],
+      "interoperability_evidence": [],
+      "public_apis": [
+        "middlewaretest.ResponseWriter wrappers",
+        "All public middleware wrappers"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md"
+      ],
+      "upstream_status": "No current upstream issue or erratum is linked for this policy.",
+      "reconsider_when": "Go adds or changes optional ResponseWriter capabilities."
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-012",
+      "title": "Completion observation and privacy",
+      "status": "resolved",
+      "owner": "http-middleware maintainers",
+      "classification": "omission",
+      "decision_scope": "application-policy",
+      "specification": "RFC 9110 HTTP Semantics",
+      "version": "RFC 9110",
+      "source_authority": "rfc9110-source",
+      "section": "Section 6 message abstraction",
+      "requirement_strength": "not specified",
+      "issue": "HTTP does not define completion-event schema, privacy labels, observer failure policy, or metadata ownership.",
+      "interpretations": [
+        "Record arbitrary request data.",
+        "Emit one bounded classified completion event."
+      ],
+      "peer_behavior": "No maintained peer differential result is recorded; peer behavior is not assessed.",
+      "selected_behavior": "Observation emits one synchronous bounded event, excludes payloads and raw identifiers, and contains metadata-extractor panics.",
+      "rationale": "The selected behavior makes the package boundary explicit and testable.",
+      "security_consequences": "The policy fails closed at untrusted or ambiguous boundaries.",
+      "resource_consequences": "Configured limits keep work and retained state bounded.",
+      "compatibility_consequences": "Changing this selected behavior requires compatibility and changelog review.",
+      "wire_consequences": "Only the documented HTTP fields, status, or response behavior can change.",
+      "executable_evidence": [
+        "TestObserverReceivesOneBoundedCompletionEvent",
+        "TestObserverIncludesOnlyBoundedInjectedClientClass",
+        "TestMetadataExtractorPanicIsContained",
+        "TestObserverSlownessIsSynchronousAndCreatesNoWorker",
+        "TestEventSchemaAndAllocationBudgets"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [],
+      "interoperability_evidence": [],
+      "public_apis": [
+        "observe.Policy",
+        "observe.Event",
+        "observe.RecordRoute",
+        "observe.New"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md"
+      ],
+      "upstream_status": "No current upstream issue or erratum is linked for this policy.",
+      "reconsider_when": "A versioned event schema replaces this policy."
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-013",
+      "title": "Local admission, fairness, and retry guidance",
+      "status": "resolved",
+      "owner": "http-middleware maintainers",
+      "classification": "omission",
+      "decision_scope": "defensive",
+      "specification": "RFC 9110 HTTP Semantics",
+      "version": "RFC 9110",
+      "source_authority": "rfc9110-source",
+      "section": "Section 10.2.3",
+      "requirement_strength": "not specified",
+      "issue": "HTTP defines Retry-After syntax but not local concurrency, waiter fairness, cancellation, shutdown, or overload ownership.",
+      "interpretations": [
+        "Reject immediately.",
+        "Use bounded immediate or finite-wait admission."
+      ],
+      "peer_behavior": "No maintained peer differential result is recorded; peer behavior is not assessed.",
+      "selected_behavior": "Admission has explicit concurrency and waiter bounds, honors cancellation and shutdown, and emits only validated Retry-After guidance.",
+      "rationale": "The selected behavior makes the package boundary explicit and testable.",
+      "security_consequences": "The policy fails closed at untrusted or ambiguous boundaries.",
+      "resource_consequences": "Configured limits keep work and retained state bounded.",
+      "compatibility_consequences": "Changing this selected behavior requires compatibility and changelog review.",
+      "wire_consequences": "Only the documented HTTP fields, status, or response behavior can change.",
+      "executable_evidence": [
+        "TestImmediateAdmissionRejectsAboveLimitAndReleasesPermit",
+        "TestBoundedWaitHonorsCancellationWithoutLeakingPermit",
+        "TestShutdownReleasesWaitingRequestAndQueueStaysBounded",
+        "TestOverloadStormStaysBoundedAndRecovers",
+        "TestFiniteWaiterWaveMakesProgressWithoutOrderGuarantee"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [],
+      "interoperability_evidence": [],
+      "public_apis": [
+        "admission.Policy",
+        "admission.Controller",
+        "admission.New"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md"
+      ],
+      "upstream_status": "No current upstream issue or erratum is linked for this policy.",
+      "reconsider_when": "A stronger fairness or distributed admission owner is adopted."
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-014",
+      "title": "Cache and maintenance response policy",
+      "status": "resolved",
+      "owner": "http-middleware maintainers",
+      "classification": "optional behavior",
+      "decision_scope": "defensive",
+      "specification": "RFC 9111 HTTP Caching",
+      "version": "RFC 9111",
+      "source_authority": "rfc9111-source",
+      "section": "Section 5.2",
+      "requirement_strength": "not specified",
+      "issue": "HTTP caching defines no-store while application policy decides maintenance admission, health ownership, and response shaping.",
+      "interpretations": [
+        "Let downstream handlers own cache policy.",
+        "Apply no-store consistently to policy responses."
+      ],
+      "peer_behavior": "No maintained peer differential result is recorded; peer behavior is not assessed.",
+      "selected_behavior": "NoStore applies to every downstream status; admission can short-circuit bounded maintenance responses but does not own health handlers.",
+      "rationale": "The selected behavior makes the package boundary explicit and testable.",
+      "security_consequences": "The policy fails closed at untrusted or ambiguous boundaries.",
+      "resource_consequences": "Configured limits keep work and retained state bounded.",
+      "compatibility_consequences": "Changing this selected behavior requires compatibility and changelog review.",
+      "wire_consequences": "Only the documented HTTP fields, status, or response behavior can change.",
+      "executable_evidence": [
+        "TestNoStoreAppliesToEveryDownstreamStatus",
+        "TestAdmissionStateShortCircuitsWithoutOwningHealthHandler",
+        "TestAdmissionConfigurationAndRetryAfterGrammar",
+        "TestAdmissionReadyAndRetryResponse"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [],
+      "interoperability_evidence": [],
+      "public_apis": [
+        "responsepolicy.NoStore",
+        "responsepolicy.Admission",
+        "responsepolicy.NewAdmission"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md"
+      ],
+      "upstream_status": "No current upstream issue or erratum is linked for this policy.",
+      "reconsider_when": "Service health ownership or cache requirements change."
+    },
+    {
+      "id": "HTTPMIDDLEWARE-DEC-015",
+      "title": "Concern ownership and sibling integration",
+      "status": "resolved",
+      "owner": "http-middleware maintainers",
+      "classification": "omission",
+      "decision_scope": "application-policy",
+      "specification": "Go 1.26.6 net/http and context contracts",
+      "version": "Go 1.26.6",
+      "source_authority": "go-http-source",
+      "section": "net/http.Handler package composition",
+      "requirement_strength": "not specified",
+      "issue": "Go handler composition does not define ownership of authentication, authorization, logging, routing, representation, webhook, or lifecycle concerns.",
+      "interpretations": [
+        "Duplicate sibling policy.",
+        "Validate explicit ownership and compose sibling handlers."
+      ],
+      "peer_behavior": "No maintained peer differential result is recorded; peer behavior is not assessed.",
+      "selected_behavior": "This module owns generic HTTP mechanics only; sibling packages own domain concerns and adapters reject duplicate ownership.",
+      "rationale": "The selected behavior makes the package boundary explicit and testable.",
+      "security_consequences": "The policy fails closed at untrusted or ambiguous boundaries.",
+      "resource_consequences": "Configured limits keep work and retained state bounded.",
+      "compatibility_consequences": "Changing this selected behavior requires compatibility and changelog review.",
+      "wire_consequences": "Only the documented HTTP fields, status, or response behavior can change.",
+      "executable_evidence": [
+        "TestGoServiceOwnershipRejectsDuplicateCoreMiddleware",
+        "TestOwningPackageConcernsComposeWithoutPolicyDuplication",
+        "TestOwnershipErrorAndInvalidConcerns",
+        "TestRepresentativeJSONRPCProfile",
+        "TestRepresentativeWebhookPreservesRawSignedBody"
+      ],
+      "fixture_evidence": [],
+      "fuzz_evidence": [],
+      "interoperability_evidence": [],
+      "public_apis": [
+        "adapter.Concern",
+        "adapter.ValidateOwnership",
+        "RecommendedStack"
+      ],
+      "documentation": [
+        "docs/specification-decisions.md"
+      ],
+      "upstream_status": "No current upstream issue or erratum is linked for this policy.",
+      "reconsider_when": "An owning sibling package changes a boundary."
+    }
+  ]
+}
