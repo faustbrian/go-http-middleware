@@ -20,7 +20,7 @@ not claim complete Fetch compliance.
 Run the focused map and evidence check with:
 
 ```console
-make conformance
+make check
 ```
 
 For an update, download the exact manifest URL, verify provenance, calculate

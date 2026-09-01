@@ -19,6 +19,6 @@ There is no initialization registration, alias lookup, reflection discovery,
 service location, default chain, exporter, logger, cache, refresher, or shutdown
 hook.
 
-`make architecture` rejects production imports of `reflect` or `unsafe`, cgo
+`make check` rejects production imports of `reflect` or `unsafe`, cgo
 and native source, linkname directives, package initializers, and dependencies
 on owning sibling packages. It also runs the complete suite with cgo disabled.

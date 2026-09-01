@@ -1,0 +1,102 @@
+schema_version: 1
+tool_version: v1.0.14
+tool_checksums_sha256: 88341d2f2904925b22ec8de084fec68c5229669f1119f066ed5fccd76aee2f82
+manifest:
+  modules: modules.json
+  packages: packages.json
+evidence:
+  root: .verification
+mutation:
+  root: .verification/mutation
+  imports:
+    - module: .
+      archive: .verification/mutation/bootstrap/root.zip
+      ledger: .verification/mutation/migration-ledger.json
+api:
+  baselines:
+    - module: .
+      mode: go-doc
+      path: api/baseline.txt
+      packages:
+        - .
+        - ./adapter
+        - ./admission
+        - ./bodylimit
+        - ./compress
+        - ./content
+        - ./cors
+        - ./deadline
+        - ./internal/httpx
+        - ./middlewaretest
+        - ./observe
+        - ./proxy
+        - ./recovery
+        - ./requestid
+        - ./responsepolicy
+        - ./secureheader
+operations:
+  - module: .
+    gate: conformance
+    steps:
+      - type: make
+        makefile: verification/package.mk
+        target: conformance
+        timeout: 20m
+  - module: .
+    gate: interoperability
+    steps:
+      - type: make
+        makefile: verification/package.mk
+        target: interoperability
+        timeout: 20m
+  - module: .
+    gate: fuzz
+    steps:
+      - type: go-test
+        packages: [.]
+        fuzz: '^FuzzDescriptorNames$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./requestid]
+        fuzz: '^FuzzInboundIdentifier$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./bodylimit]
+        fuzz: '^FuzzBodyLimit$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./proxy]
+        fuzz: '^FuzzForwardedField$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./cors]
+        fuzz: '^FuzzOriginAndPreflight$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./compress]
+        fuzz: '^FuzzAcceptEncoding$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./content]
+        fuzz: '^FuzzAcceptMediaTypes$'
+        budget: 10000x
+        timeout: 20m
+      - type: go-test
+        packages: [./secureheader]
+        fuzz: '^FuzzConfiguredHeaderValues$'
+        budget: 10000x
+        timeout: 20m
+  - module: .
+    gate: benchmark
+    steps:
+      - type: go-test
+        packages: [.]
+        benchmark: Benchmark
+        budget: 100ms
+        timeout: 20m
