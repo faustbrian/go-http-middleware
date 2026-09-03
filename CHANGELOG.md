@@ -32,11 +32,24 @@ Current specification decision content:
   shared workflow so local and hosted gates enforce specification governance
   while preserving the API baseline, mutation checkpoints, HTTP conformance
   tests, sibling integration harness, and package fixtures.
+- Adopt the checksum-verified `go-library-tools` v1.3.0 CLI, schema-v2 cohesion
+  metadata, repository-local validation target, and immutable shared workflow.
+- Adopt the checksum-verified `go-library-tools` v1.4.0 CLI and immutable
+  shared workflow so authority monitoring uses the stabilized request profile
+  and public-first module resolution.
+- Reconcile the sibling integration harness with the immutable public SumDB
+  identities for its Golib v1.0.0 dependencies.
 
 ### Documentation
 
+- Record the behavior-neutral reviews of Go 1.26.7 through 1.26.8, RFC 9110
+  Erratum 9162, current WHATWG Fetch and URL sources, and W3C Referrer Policy;
+  the selected middleware behavior and conformance bindings remain unchanged.
+
 - Remove completed implementation plans from the release tree and retain
   package-owned documentation as the maintained reference.
+- Link the public module to the versioned Golib ecosystem design language and
+  package-selection guidance.
 
 ## 1.0.0 - 2026-08-25
 

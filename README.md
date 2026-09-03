@@ -114,6 +114,9 @@ policy are recorded in the
 [conformance matrix](specification/README.md) maps those decisions to
 authoritative sources and executable evidence.
 
+Shared package selection, construction, ownership, and lifecycle expectations
+follow the versioned [Golib ecosystem design language](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md).
+
 ## Compatibility
 
 The minimum toolchain is Go 1.26.6. Normal tracking and header wrappers preserve
@@ -124,11 +127,13 @@ interfaces. See [the complete matrix](docs/responsewriter.md).
 ## Development
 
 ```sh
+make cohesion
 make check
 ```
 
-`make inventory` validates manifest consistency and `make ci` runs the
-repository plus module contract. The pinned `go-library-tools` release in
+`make inventory` validates manifest consistency, `make cohesion` validates the
+module's ecosystem contract, and `make ci` runs the repository plus module
+contract. The pinned `go-library-tools` release in
 `.golib.yaml` owns generic verification; package-specific HTTP conformance and
 sibling interoperability remain in the repository. Hosted release publication
 remains separate from local verification.

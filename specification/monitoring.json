@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "reviewed_at": "2026-08-30",
+  "reviewed_at": "2026-09-03",
   "review_interval_days": 90,
   "authorities": [
     {
@@ -48,7 +48,7 @@
       "kind": "errata",
       "version": "",
       "url": "https://errata.rfc-editor.org/search/?rfc_number=9110&presentation=records",
-      "sha256": "38bd006c96f8963d58573f704c5313a5f81968b90738c03ade0b036ec7bbdf4b",
+      "sha256": "1f6790054c0cdb2f2a70a94fa2b9c73b09a4ee0578a32b4a3006ed0ecfaac86d",
       "specifications": [
         "RFC 9110 HTTP Semantics"
       ]
@@ -148,7 +148,7 @@
       "kind": "releases",
       "version": "",
       "url": "https://api.github.com/repos/whatwg/fetch/commits?path=fetch.bs&per_page=1",
-      "sha256": "cdfa5e2aee36d0d2bb7f004c961592ca58203fc24b67d35425bba6983f0729d6",
+      "sha256": "7ed065b7a06def25714146ec33bb08f014914af2acf8047400433bcde31b8b8d",
       "specifications": [
         "WHATWG Fetch CORS protocol at 586cd2a44c2a"
       ]

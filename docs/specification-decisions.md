@@ -824,6 +824,16 @@ The authoritative typed record is preserved verbatim for human and machine revie
 
 Primary authoritative URL: https://raw.githubusercontent.com/golang/go/go1.26.6/src/net/http/server.go
 
+## Authority review history
+
+| Reviewed | Authority | Disposition | Decision impact |
+| --- | --- | --- | --- |
+| 2026-09-03 | Go releases through Go 1.26.8 | Behavior-neutral. Go 1.26.7 changed h2c deadline clearing outside this module's owned middleware contract, and Go 1.26.8 made no further change to the monitored `net/http` or `context` contract. The unchanged authenticated release response also confirms that the earlier `weekly.2012-03-27` result was monitor serialization drift rather than a Go release change. | `HTTPMIDDLEWARE-DEC-001`, `-003`, `-004`, `-005`, `-011`, and `-015` and their conformance bindings remain unchanged. |
+| 2026-09-03 | RFC 9110 Erratum 9162 | Behavior-neutral. The proposed comma-space spelling for combining repeated field lines does not alter the package contract: duplicate singleton fields are rejected, list fields trim optional whitespace, and generated combinations already use comma-space. | `HTTPMIDDLEWARE-DEC-002`, `-007`, `-009`, and `-010` and their conformance bindings remain unchanged. |
+| 2026-09-03 | WHATWG Fetch through `394d20d144ed1401c2c0e02c35bc3608cb2a2269` | Behavior-neutral. The reviewed changes concern timing metadata, internal request typing, exported definitions, links, and editorial text; the CORS, preflight, origin, credentialed-wildcard, and serialization behavior selected by this module is unchanged. | `HTTPMIDDLEWARE-DEC-007` and its conformance bindings remain unchanged. |
+| 2026-09-03 | WHATWG URL through `55d6699373ba68a16ec182f34222a74ed8bc3dac` | Behavior-neutral. The only `url.bs` change is the publication macro from `2026-02` to `2026-08`; the origin and URL algorithms used by this module are byte-identical. | `HTTPMIDDLEWARE-DEC-007` and its conformance bindings remain unchanged. |
+| 2026-09-03 | W3C Referrer Policy at `cc435b05ca4a94f7f1a139be5074b168d20014db` | Behavior-neutral. The reviewed source remains current and byte-identical; only the release-monitor response profile drifted. | `HTTPMIDDLEWARE-DEC-008` and its conformance bindings remain unchanged. |
+
 ## Unresolved and excluded behavior
 
 No known material ambiguity in the current public surface is unresolved.
