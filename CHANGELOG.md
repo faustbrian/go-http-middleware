@@ -32,11 +32,15 @@ Current specification decision content:
   shared workflow so local and hosted gates enforce specification governance
   while preserving the API baseline, mutation checkpoints, HTTP conformance
   tests, sibling integration harness, and package fixtures.
+- Adopt the checksum-verified `go-library-tools` v1.3.0 CLI, schema-v2 cohesion
+  metadata, repository-local validation target, and immutable shared workflow.
 
 ### Documentation
 
 - Remove completed implementation plans from the release tree and retain
   package-owned documentation as the maintained reference.
+- Link the public module to the versioned Golib ecosystem design language and
+  package-selection guidance.
 
 ## 1.0.0 - 2026-08-25
 

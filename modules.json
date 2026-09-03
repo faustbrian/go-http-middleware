@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "repository": "github.com/faustbrian/go-http-middleware",
   "go_version": "1.26.6",
   "modules": [
@@ -260,6 +260,102 @@
         "race": true,
         "security": true,
         "tests": true
+      },
+      "cohesion": {
+        "family": "service-edge",
+        "secondary_capabilities": [
+          "http-and-service-edge",
+          "observability",
+          "protocols-and-schemas",
+          "resilience-and-admission"
+        ],
+        "responsibility": "Provide explicit, bounded server-side net/http middleware and deterministic chain composition without hidden registration or defaults.",
+        "non_goals": [
+          "Own routing, server lifecycle, authentication, authorization, distributed rate limiting, idempotency, telemetry backends, or application response formats.",
+          "Provide a registry, service container, global default chain, background runtime, or framework bootstrap."
+        ],
+        "public_package_identifier": "middleware",
+        "primary_entry_packages": [
+          "github.com/faustbrian/go-http-middleware"
+        ],
+        "package_selection": {
+          "github.com/faustbrian/go-http-middleware": "Use to validate and compose an explicit ordered net/http middleware chain.",
+          "github.com/faustbrian/go-http-middleware/adapter": "Use to name middleware ownership concerns and reject overlap with service-owned defaults.",
+          "github.com/faustbrian/go-http-middleware/admission": "Use for bounded process-local in-flight admission; use go-rate-limit for distributed quotas.",
+          "github.com/faustbrian/go-http-middleware/bodylimit": "Use to bound encoded request-body bytes before application decoding.",
+          "github.com/faustbrian/go-http-middleware/compress": "Use for bounded HTTP gzip response negotiation and encoding.",
+          "github.com/faustbrian/go-http-middleware/content": "Use for bounded request and response media-type guards without owning codecs.",
+          "github.com/faustbrian/go-http-middleware/cors": "Use for explicit server-side CORS response and preflight policy, not authentication or CSRF protection.",
+          "github.com/faustbrian/go-http-middleware/deadline": "Use for request deadlines or bounded buffered handler timeouts with explicit concurrency and response limits.",
+          "github.com/faustbrian/go-http-middleware/middlewaretest": "Use in tests for deterministic middleware traces and ResponseWriter capability inspection.",
+          "github.com/faustbrian/go-http-middleware/observe": "Use to emit bounded request-completion events without owning log or telemetry backends.",
+          "github.com/faustbrian/go-http-middleware/proxy": "Use to derive peer, host, scheme, and prefix only from explicitly trusted proxy networks.",
+          "github.com/faustbrian/go-http-middleware/recovery": "Use for bounded panic containment that never rewrites an already committed response.",
+          "github.com/faustbrian/go-http-middleware/requestid": "Use for bounded request and correlation identifiers with explicit inbound trust policy.",
+          "github.com/faustbrian/go-http-middleware/responsepolicy": "Use for deterministic no-store responses and caller-owned readiness admission.",
+          "github.com/faustbrian/go-http-middleware/secureheader": "Use for explicit bounded response-security headers with acknowledged HSTS policy."
+        },
+        "lifecycle_status": "active",
+        "maturity": "stable",
+        "construction_styles": [
+          "new-config",
+          "plain-function",
+          "validated-value"
+        ],
+        "lifecycle_styles": [
+          "stateless"
+        ],
+        "ownership": {
+          "configuration": "caller",
+          "mutable_inputs": [
+            "copy"
+          ],
+          "runtime_resources": "none",
+          "background_work": "none"
+        },
+        "optional_owned_dependencies": [],
+        "adapters": [],
+        "companions": [
+          "github.com/faustbrian/go-authentication",
+          "github.com/faustbrian/go-authorization",
+          "github.com/faustbrian/go-correlation",
+          "github.com/faustbrian/go-router",
+          "github.com/faustbrian/go-service",
+          "github.com/faustbrian/go-telemetry"
+        ],
+        "supported_go": {
+          "minimum": "1.26.6",
+          "tested": [
+            "1.26.6"
+          ]
+        },
+        "supported_platforms": [
+          "portable-go"
+        ],
+        "supported_backends": [],
+        "supported_protocols": [
+          "http-1-1",
+          "http-2"
+        ],
+        "documentation": {
+          "readme": "README.md",
+          "api": "docs/api.md",
+          "adoption": "docs/adoption.md",
+          "security": "docs/security.md",
+          "compatibility": "docs/compatibility.md",
+          "performance": "docs/performance.md",
+          "examples": "docs/cookbook.md",
+          "faq": "docs/faq.md",
+          "changelog": "CHANGELOG.md",
+          "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-http-middleware",
+          "ecosystem_index": "https://github.com/faustbrian/go-library-tools/blob/v1.3.0/docs/ecosystem/README.md"
+        },
+        "known_good_compatibility_sets": [],
+        "delivery": {
+          "implementation": "not-started",
+          "hardening": "not-started",
+          "release": "not-started"
+        }
       }
     },
     {
@@ -267,10 +363,14 @@
       "module_path": "github.com/faustbrian/go-http-middleware/integration/siblings",
       "go_version": "1.26.6",
       "packages": [],
-      "purpose": "See the module README and goal files.",
+      "purpose": "Non-releasable interoperability harness proving middleware composition with the broader HTTP service stack.",
       "lifecycle": "internal",
       "kind": "interoperability harness",
       "releasable": false,
+      "family": "service-edge",
+      "family_label": "Service Edge",
+      "family_description": "Request-edge policy, identity, access decisions, routing, middleware, and process lifecycle.",
+      "family_order": 2,
       "version": "unreleased",
       "tag_prefix": "integration/siblings/v",
       "owned_dependencies": [
