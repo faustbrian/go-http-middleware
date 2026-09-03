@@ -115,7 +115,10 @@ policy are recorded in the
 authoritative sources and executable evidence.
 
 Shared package selection, construction, ownership, and lifecycle expectations
-follow the versioned [Golib ecosystem design language](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md).
+follow the versioned [Golib ecosystem
+index](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md)
+and its [service-edge package
+guidance](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/design-language.md#package-families-and-selection).
 
 ## Compatibility
 
