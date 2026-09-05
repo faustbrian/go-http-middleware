@@ -35,13 +35,16 @@ preflights, compression, and contended admission. Results are machine-specific;
 the release record must preserve Go version, OS, architecture, CPU, payload,
 concurrency, and benchmark duration with any regression claim.
 
-## Latest local release run
+## Historical local release run
 
 On 2026-07-18, `make ci` passed with Go 1.26.5 on Darwin arm64,
 Apple M4 Max. It reported 100.0% production statement coverage, 59/59 killed
 mutants, eight two-second fuzz targets, no race, leak, vulnerability, lint,
 Staticcheck, API, documentation, architecture, or NilAway finding, and green
 real HTTP plus pinned sibling integration suites.
+
+This retained snapshot is machine-specific historical evidence, not the
+current repository verification status.
 
 | Benchmark | ns/op | B/op | allocs/op |
 |---|---:|---:|---:|

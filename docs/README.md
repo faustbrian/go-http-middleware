@@ -15,6 +15,7 @@
 - [Adoption guides](adoption.md)
 - [Integration cookbook](integrations.md)
 - [Ownership and sibling integration](ownership.md)
+- [Sibling interoperability harness](../integration/siblings/README.md)
 - [Migration guide](migration.md)
 - [Cookbook](cookbook.md)
 - [Performance](performance.md)

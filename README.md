@@ -138,8 +138,9 @@ make check
 module's ecosystem contract, and `make ci` runs the repository plus module
 contract. The pinned `go-library-tools` release in
 `.golib.yaml` owns generic verification; package-specific HTTP conformance and
-sibling interoperability remain in the repository. Hosted release publication
-remains separate from local verification.
+[sibling interoperability](integration/siblings/README.md) remain in the
+repository. Hosted release publication remains separate from local
+verification.
 
 The CI badge covers the blocking `quality`, `lint`, `staticcheck`, and
 `vulnerability` jobs. Release verification repeats `make check` before a
