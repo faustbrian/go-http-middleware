@@ -20,6 +20,7 @@ unsafe package, linkname, runtime patch, plugin loader, or hidden exporter.
 Command-line quality tools are version-pinned in the Makefile and are invoked
 with `go run`; they are not library dependencies.
 
-`integration/siblings` is a separate test-only module. It pins `router` and
-`service` revisions for real compatibility checks while keeping both out of
-the production module graph.
+[`integration/siblings`](../integration/siblings/README.md) is a separate,
+non-releasable test module. It pins the compatible Golib module versions used
+by the interoperability checks while keeping them out of the production module
+graph.

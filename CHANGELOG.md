@@ -42,6 +42,8 @@ Current specification decision content:
 
 ### Documentation
 
+- Document the non-releasable sibling interoperability harness and distinguish
+  its historical verification snapshot from current repository status.
 - Add immutable v1.4.0 ecosystem and service-edge family navigation.
 - Record the behavior-neutral reviews of Go 1.26.7 through 1.26.8, RFC 9110
   Erratum 9162, current WHATWG Fetch and URL sources, and W3C Referrer Policy;
