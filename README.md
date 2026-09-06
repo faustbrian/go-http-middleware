@@ -127,6 +127,15 @@ the exact `Flusher`, `Hijacker`, `Pusher`, and `ReaderFrom` set of the underlyin
 writer. Buffered timeout and compression intentionally do not expose streaming
 interfaces. See [the complete matrix](docs/responsewriter.md).
 
+## Documentation and support
+
+Use the [documentation index](docs/README.md) for adoption, API, operations,
+security, performance, compatibility, FAQ, and troubleshooting guidance. The
+[compiler-checked examples](example_test.go) demonstrate the public chain and
+request-ID APIs. Report defects through [support](SUPPORT.md), report
+vulnerabilities through the private process in [SECURITY.md](SECURITY.md), and
+review user-visible changes in the [changelog](CHANGELOG.md).
+
 ## Development
 
 ```sh

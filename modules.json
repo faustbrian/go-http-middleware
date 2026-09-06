@@ -344,7 +344,7 @@
           "security": "docs/security.md",
           "compatibility": "docs/compatibility.md",
           "performance": "docs/performance.md",
-          "examples": "docs/cookbook.md",
+          "examples": "example_test.go",
           "faq": "docs/faq.md",
           "changelog": "CHANGELOG.md",
           "pkg_go_dev": "https://pkg.go.dev/github.com/faustbrian/go-http-middleware",

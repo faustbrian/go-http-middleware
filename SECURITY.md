@@ -7,10 +7,11 @@ only the latest release is supported.
 
 ## Reporting
 
-Use GitHub private vulnerability reporting for this repository. Do not open a
-public issue containing an exploit, credential, private address, or production
-payload. Include the affected version, middleware order, minimal reproduction,
-and whether headers or a response were already committed.
+Use [GitHub private vulnerability reporting](https://github.com/faustbrian/go-http-middleware/security/advisories/new)
+for this repository. Do not open a public issue containing an exploit,
+credential, private address, or production payload. Include the affected
+version, middleware order, minimal reproduction, and whether headers or a
+response were already committed.
 
 ## Deployment boundary
 
