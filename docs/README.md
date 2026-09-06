@@ -1,5 +1,7 @@
 # Documentation
 
+- [Compiler-checked examples](../example_test.go)
+- [Testing helpers](https://pkg.go.dev/github.com/faustbrian/go-http-middleware/middlewaretest)
 - [API reference](api.md)
 - [Architecture](architecture.md)
 - [Ordering](ordering.md)
@@ -23,3 +25,7 @@
 - [FAQ](faq.md)
 - [Troubleshooting](troubleshooting.md)
 - [Release process](release.md)
+- [Support](../SUPPORT.md)
+- [Private vulnerability reporting](../SECURITY.md)
+- [Changelog](../CHANGELOG.md)
+- [License](../LICENSE) and [notices](../NOTICE)

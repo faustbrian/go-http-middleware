@@ -42,6 +42,9 @@ Current specification decision content:
 
 ### Documentation
 
+- Complete the documentation and support entry points, bind example metadata
+  to compiler-checked examples, and activate direct discussion and private
+  vulnerability-reporting routes.
 - Document the non-releasable sibling interoperability harness and distinguish
   its historical verification snapshot from current repository status.
 - Add immutable v1.4.0 ecosystem and service-edge family navigation.
