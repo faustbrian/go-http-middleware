@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
   "repository": "github.com/faustbrian/go-http-middleware",
-  "go_version": "1.26.6",
+  "go_version": "1.27.0",
   "modules": [
     {
       "directory": ".",
       "module_path": "github.com/faustbrian/go-http-middleware",
-      "go_version": "1.26.6",
+      "go_version": "1.27.0",
       "packages": [
         {
           "module_directory": ".",
@@ -326,7 +326,7 @@
         "supported_go": {
           "minimum": "1.26.6",
           "tested": [
-            "1.26.6"
+            "1.27.0"
           ]
         },
         "supported_platforms": [
@@ -361,7 +361,7 @@
     {
       "directory": "integration/siblings",
       "module_path": "github.com/faustbrian/go-http-middleware/integration/siblings",
-      "go_version": "1.26.6",
+      "go_version": "1.27.0",
       "packages": [],
       "purpose": "Non-releasable interoperability harness proving middleware composition with the broader HTTP service stack.",
       "lifecycle": "internal",

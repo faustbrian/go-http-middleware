@@ -1,6 +1,6 @@
 module github.com/faustbrian/go-http-middleware/integration/siblings
 
-go 1.26.6
+go 1.27.0
 
 require (
 	github.com/faustbrian/go-authentication v1.0.0

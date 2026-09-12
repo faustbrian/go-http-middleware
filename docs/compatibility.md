@@ -1,6 +1,6 @@
 # Compatibility
 
-The public contract is Go 1.26.6 `net/http`. API snapshots are checked against
+The public contract is Go 1.27.0 `net/http`. API snapshots are checked against
 `api/baseline.txt`. Incompatible changes require a new major version, changelog,
 and migration notes.
 
