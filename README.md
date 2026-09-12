@@ -7,7 +7,7 @@
 [![Documentation](https://img.shields.io/badge/docs-checked_in_CI-blue)](docs/)
 [![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-http-middleware.svg)](https://pkg.go.dev/github.com/faustbrian/go-http-middleware)
 [![Release](https://img.shields.io/github/v/release/faustbrian/go-http-middleware?sort=semver)](https://github.com/faustbrian/go-http-middleware/releases)
-[![Go](https://img.shields.io/badge/go-1.26.6-00ADD8?logo=go)](https://go.dev/)
+[![Go](https://img.shields.io/badge/go-1.27.0-00ADD8?logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Explicit, bounded server-side HTTP middleware built on `net/http`. The root
@@ -122,7 +122,7 @@ guidance](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosys
 
 ## Compatibility
 
-The minimum toolchain is Go 1.26.6. Normal tracking and header wrappers preserve
+The minimum toolchain is Go 1.27.0. Normal tracking and header wrappers preserve
 the exact `Flusher`, `Hijacker`, `Pusher`, and `ReaderFrom` set of the underlying
 writer. Buffered timeout and compression intentionally do not expose streaming
 interfaces. See [the complete matrix](docs/responsewriter.md).
