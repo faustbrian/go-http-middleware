@@ -65,7 +65,7 @@ func New(policy Policy) (func(http.Handler) http.Handler, error) {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if len(requests) != 0 && hasBody(r) {
 				values := r.Header.Values("Content-Type")
-				if len(values) != 1 {
+				if len(values) != 1 || len(values[0]) > policy.MaxHeaderBytes {
 					httpx.SafeError(w, http.StatusUnsupportedMediaType, "unsupported media type\n")
 					return
 				}

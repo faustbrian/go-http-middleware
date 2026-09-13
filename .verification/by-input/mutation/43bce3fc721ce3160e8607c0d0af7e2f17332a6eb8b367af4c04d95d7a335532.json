@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "repository": "github.com/faustbrian/go-http-middleware",
+  "module": ".",
+  "package": "proxy",
+  "gate": "mutation",
+  "input_digest": "sha256:43bce3fc721ce3160e8607c0d0af7e2f17332a6eb8b367af4c04d95d7a335532",
+  "verifier_digest": "sha256:9a9499ff68a8dfd49a0be7995590297a8ee563a1aa226bfd8b9361dc53058108",
+  "result": "passed",
+  "report_digest": "sha256:5823a43c99c54d11d31cbd3e7b015b160e6520dee0d04bece5df4d42fde79926",
+  "environment": {
+    "CGO_ENABLED": "1",
+    "GOARCH": "arm64",
+    "GOOS": "darwin",
+    "GOVERSION": "go1.27.1",
+    "gremlins_binary_sha256": "sha256:3500ba5216454cd0e74be81da7b927251d831230ee89858c90d2028c1ade7694"
+  },
+  "completed_at": "2026-09-13T13:28:21.551491Z"
+}

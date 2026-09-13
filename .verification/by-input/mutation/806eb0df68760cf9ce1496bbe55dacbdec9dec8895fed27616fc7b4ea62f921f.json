@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "repository": "github.com/faustbrian/go-http-middleware",
+  "module": ".",
+  "package": "compress",
+  "gate": "mutation",
+  "input_digest": "sha256:806eb0df68760cf9ce1496bbe55dacbdec9dec8895fed27616fc7b4ea62f921f",
+  "verifier_digest": "sha256:9a9499ff68a8dfd49a0be7995590297a8ee563a1aa226bfd8b9361dc53058108",
+  "result": "passed",
+  "report_digest": "sha256:ad5fb31387a181df04375dbe531f0a8e8ffaf18e9f6b5553b557414cec993e8e",
+  "environment": {
+    "CGO_ENABLED": "1",
+    "GOARCH": "arm64",
+    "GOOS": "darwin",
+    "GOVERSION": "go1.27.1",
+    "gremlins_binary_sha256": "sha256:3500ba5216454cd0e74be81da7b927251d831230ee89858c90d2028c1ade7694"
+  },
+  "completed_at": "2026-09-13T17:58:30.52161Z"
+}

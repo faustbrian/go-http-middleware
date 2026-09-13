@@ -89,3 +89,26 @@ func TestRecoveryCapturesBoundedCallerOnlyStack(t *testing.T) {
 		t.Fatal("stack exposed panic value")
 	}
 }
+
+func TestRecoveryStackCaptureUsesOneBoundedAllocation(t *testing.T) {
+	observer := func(recovery.Event) {}
+	withoutCapture, _ := recovery.New(recovery.Policy{Observer: observer})
+	withCapture, _ := recovery.New(recovery.Policy{
+		Observer:      observer,
+		CaptureStack:  true,
+		MaxStackBytes: 1,
+	})
+	panicking := http.HandlerFunc(func(http.ResponseWriter, *http.Request) { panic("boom") })
+	withoutCaptureHandler := withoutCapture(panicking)
+	withCaptureHandler := withCapture(panicking)
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	baseline := testing.AllocsPerRun(100, func() {
+		withoutCaptureHandler.ServeHTTP(httptest.NewRecorder(), request)
+	})
+	captured := testing.AllocsPerRun(100, func() {
+		withCaptureHandler.ServeHTTP(httptest.NewRecorder(), request)
+	})
+	if captured > baseline+1 {
+		t.Fatalf("stack capture allocations = %f, baseline = %f", captured, baseline)
+	}
+}

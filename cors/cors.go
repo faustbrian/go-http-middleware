@@ -68,8 +68,10 @@ func New(policy Policy) (func(http.Handler) http.Handler, error) {
 	}
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			preflight := r.Method == http.MethodOptions &&
+				len(r.Header.Values("Access-Control-Request-Method")) != 0
 			if corsHeaderBytes(r.Header) > configuration.maxBytes {
-				if r.Method == http.MethodOptions && len(r.Header.Values("Access-Control-Request-Method")) != 0 {
+				if preflight {
 					httpx.SafeError(w, http.StatusBadRequest, "invalid CORS preflight\n")
 					return
 				}
@@ -85,11 +87,19 @@ func New(policy Policy) (func(http.Handler) http.Handler, error) {
 				httpx.AddVary(w.Header(), "Origin")
 			}
 			if len(originValues) != 1 || len(originValues) > configuration.maxValues {
+				if preflight {
+					httpx.SafeError(w, http.StatusBadRequest, "invalid CORS preflight\n")
+					return
+				}
 				serveVary(next, w, r, configuration.wildcard)
 				return
 			}
 			origin, ok := canonicalOrigin(originValues[0])
 			if !ok {
+				if preflight {
+					httpx.SafeError(w, http.StatusBadRequest, "invalid CORS preflight\n")
+					return
+				}
 				serveVary(next, w, r, configuration.wildcard)
 				return
 			}
@@ -101,7 +111,6 @@ func New(policy Policy) (func(http.Handler) http.Handler, error) {
 				accepted, dynamicErr := configuration.dynamic(r.Context(), origin)
 				allowed = dynamicErr == nil && accepted
 			}
-			preflight := r.Method == http.MethodOptions && r.Header.Get("Access-Control-Request-Method") != ""
 			if !allowed {
 				if preflight {
 					httpx.SafeError(w, http.StatusForbidden, "CORS preflight denied\n")
@@ -233,8 +242,9 @@ func (c compiled) preflight(w http.ResponseWriter, r *http.Request) bool {
 		httpx.SafeError(w, http.StatusForbidden, "CORS preflight denied\n")
 		return false
 	}
-	requested := splitHeaderList(r.Header.Values("Access-Control-Request-Headers"), c.maxValues, c.maxBytes)
-	if requested == nil && r.Header.Get("Access-Control-Request-Headers") != "" {
+	requestedValues := r.Header.Values("Access-Control-Request-Headers")
+	requested := splitHeaderList(requestedValues, c.maxValues, c.maxBytes)
+	if requested == nil && len(requestedValues) != 0 {
 		clearCORS(w.Header())
 		httpx.SafeError(w, http.StatusBadRequest, "invalid CORS preflight\n")
 		return false

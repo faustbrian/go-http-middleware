@@ -106,6 +106,49 @@ func TestPreflightRejectsConflictingSingularFields(t *testing.T) {
 	}
 }
 
+func TestMalformedPreflightEnvelopeNeverReachesApplication(t *testing.T) {
+	t.Parallel()
+
+	middleware, err := cors.New(cors.Policy{
+		AllowedOrigins: []string{"https://app.example"},
+		AllowedMethods: []string{http.MethodPost},
+	})
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
+	for _, test := range []struct {
+		name             string
+		origin           []string
+		method           []string
+		requestedHeaders []string
+	}{
+		{name: "duplicate origin", origin: []string{"https://app.example", "https://app.example"}, method: []string{http.MethodPost}},
+		{name: "malformed origin", origin: []string{"not an origin"}, method: []string{http.MethodPost}},
+		{name: "empty method", origin: []string{"https://app.example"}, method: []string{""}},
+		{name: "empty leading requested header", origin: []string{"https://app.example"}, method: []string{http.MethodPost}, requestedHeaders: []string{"", "X-One"}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			request := httptest.NewRequest(http.MethodOptions, "/", nil)
+			request.Header["Origin"] = test.origin
+			request.Header["Access-Control-Request-Method"] = test.method
+			if test.requestedHeaders != nil {
+				request.Header["Access-Control-Request-Headers"] = test.requestedHeaders
+			}
+			called := false
+			recorder := httptest.NewRecorder()
+			middleware(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+				called = true
+			})).ServeHTTP(recorder, request)
+			if called || recorder.Code != http.StatusBadRequest {
+				t.Fatalf("application called = %v, status = %d", called, recorder.Code)
+			}
+			if got := recorder.Header().Get("Access-Control-Allow-Origin"); got != "" {
+				t.Fatalf("allow origin = %q", got)
+			}
+		})
+	}
+}
+
 func TestPreflightMethodComparisonIsCaseSensitive(t *testing.T) {
 	t.Parallel()
 	middleware, err := cors.New(cors.Policy{

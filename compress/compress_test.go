@@ -84,6 +84,47 @@ func TestCompressionSkipsNoBodyHeadRangeAndAlreadyEncodedResponses(t *testing.T)
 	}
 }
 
+func TestCompressionHonorsNoTransformAcrossCacheControlLines(t *testing.T) {
+	t.Parallel()
+
+	middleware, _ := compress.New(compress.Policy{MinimumBytes: 1})
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	request.Header.Set("Accept-Encoding", "gzip")
+	recorder := httptest.NewRecorder()
+	middleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Add("Cache-Control", "private")
+		w.Header().Add("Cache-Control", "no-transform")
+		_, _ = io.WriteString(w, "sensitive response")
+	})).ServeHTTP(recorder, request)
+	if got := recorder.Header().Get("Content-Encoding"); got != "" {
+		t.Fatalf("content encoding = %q", got)
+	}
+}
+
+func TestCompressionDoesNotTreatExtensionValuesAsNoTransform(t *testing.T) {
+	t.Parallel()
+
+	for _, value := range []string{
+		"x-no-transform",
+		`extension="private,no-transform,diagnostic"`,
+	} {
+		t.Run(value, func(t *testing.T) {
+			middleware, _ := compress.New(compress.Policy{MinimumBytes: 1})
+			request := httptest.NewRequest(http.MethodGet, "/", nil)
+			request.Header.Set("Accept-Encoding", "gzip")
+			recorder := httptest.NewRecorder()
+			middleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.Header().Add("Cache-Control", "private")
+				w.Header().Add("Cache-Control", value)
+				_, _ = io.WriteString(w, "compressible response")
+			})).ServeHTTP(recorder, request)
+			if got := recorder.Header().Get("Content-Encoding"); got != "gzip" {
+				t.Fatalf("content encoding = %q", got)
+			}
+		})
+	}
+}
+
 func TestExplicitCodingQualityOverridesWildcardAndEmptyMeansIdentity(t *testing.T) {
 	t.Parallel()
 

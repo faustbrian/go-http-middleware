@@ -24,7 +24,7 @@ privileged but may misconfigure policy.
 | route metadata | 128 bytes |
 | client class | 64 bytes |
 | observed method/protocol | fixed known classes plus `OTHER` |
-| recovery stack | 64 KiB default, 1 MiB hard maximum |
+| recovery stack allocation and retained event | 64 KiB default, 1 MiB hard maximum |
 | in-flight permits/waiters | caller configured, 1,000,000 hard maximum |
 
 Mitigations cover CRLF splitting, spoofed forwarding fields, host confusion,
