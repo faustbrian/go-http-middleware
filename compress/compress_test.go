@@ -101,6 +101,22 @@ func TestCompressionHonorsNoTransformAcrossCacheControlLines(t *testing.T) {
 	}
 }
 
+func TestCompressionFailsClosedForMalformedCacheControl(t *testing.T) {
+	t.Parallel()
+
+	middleware, _ := compress.New(compress.Policy{MinimumBytes: 1})
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	request.Header.Set("Accept-Encoding", "gzip")
+	recorder := httptest.NewRecorder()
+	middleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Cache-Control", "private,")
+		_, _ = io.WriteString(w, "sensitive response")
+	})).ServeHTTP(recorder, request)
+	if got := recorder.Header().Get("Content-Encoding"); got != "" {
+		t.Fatalf("content encoding = %q", got)
+	}
+}
+
 func TestCompressionDoesNotTreatExtensionValuesAsNoTransform(t *testing.T) {
 	t.Parallel()
 
