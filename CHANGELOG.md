@@ -4,6 +4,18 @@ This project follows Semantic Versioning and Keep a Changelog.
 
 ## Unreleased
 
+### Fixed
+
+- Reject malformed CORS preflight envelopes before application routing,
+  including duplicate or invalid origins and present-but-invalid method or
+  requested-header fields.
+- Apply the configured content-negotiation byte ceiling to request
+  `Content-Type` values before parsing.
+- Honor `Cache-Control: no-transform` across every response field line before
+  enabling gzip compression.
+- Capture recovery stacks directly into the configured bounded buffer instead
+  of allocating an unbounded intermediate trace.
+
 ### Changed
 
 - Publish the machine-auditable [specification decision register](docs/specification-decisions.md)

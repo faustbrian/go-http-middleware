@@ -16,7 +16,10 @@ List exact origins whenever credentials are enabled. Wildcard method, header,
 exposure, and origin configurations are rejected with credentials. CORS only
 controls browser response visibility; it is not authentication, authorization,
 or CSRF protection. Requested methods are validated as tokens before wildcard
-matching or response-header reflection.
+matching or response-header reflection. An OPTIONS request is classified as a
+preflight only when `Access-Control-Request-Method` is present. Once classified,
+every present preflight control field is validated even when its first value is
+empty, and malformed origins never reach the application handler.
 
 ## HSTS and headers
 
@@ -28,9 +31,9 @@ cannot infer scripts, templates, nonces, or application assets.
 
 Set `Cache-Control: no-transform` for secrets reflected near attacker-controlled
 input. Compression skips ranges, existing encodings, no-body statuses, HEAD,
-and small responses. Eligible large responses continue as bounded-memory gzip
-streams. Coding changes remove representation-specific length, digest, and
-entity-tag fields.
+and small responses. The opt-out is honored across every Cache-Control field
+line. Eligible large responses continue as bounded-memory gzip streams. Coding
+changes remove representation-specific length, digest, and entity-tag fields.
 
 ## IDs, bodies, and timeouts
 
@@ -43,6 +46,7 @@ Buffered handler timeouts cap retained output and intentionally reject
 streaming capabilities. `MaxConcurrent` also bounds handler executions that
 remain after their timeout because they ignored cancellation.
 
-Content negotiation rejects duplicate `Content-Type` fields and validates all
-`Accept` field values before allowing a representation. A valid leading range
-cannot hide a malformed or oversized tail.
+Content negotiation rejects duplicate or oversized `Content-Type` fields before
+parsing and validates all `Accept` field values before allowing a
+representation. A valid leading range cannot hide a malformed or oversized
+tail.

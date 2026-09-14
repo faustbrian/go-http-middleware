@@ -187,7 +187,7 @@ func shouldCompress(r *http.Request, w *responseBuffer, gzipQ, identityQ float64
 func shouldCompressSize(r *http.Request, w *responseBuffer, gzipQ, identityQ float64, minimum int, excluded []string, size int) bool {
 	status := statusOrOK(w.status)
 	header := w.responseHeader()
-	if gzipQ <= 0 || gzipQ < identityQ || r.Method == http.MethodHead || status < 200 || status == http.StatusNoContent || status == http.StatusNotModified || r.Header.Get("Range") != "" || header.Get("Content-Range") != "" || header.Get("Content-Encoding") != "" || strings.Contains(strings.ToLower(header.Get("Cache-Control")), "no-transform") || size < minimum {
+	if gzipQ <= 0 || gzipQ < identityQ || r.Method == http.MethodHead || status < 200 || status == http.StatusNoContent || status == http.StatusNotModified || r.Header.Get("Range") != "" || header.Get("Content-Range") != "" || header.Get("Content-Encoding") != "" || hasNoTransform(header) || size < minimum {
 		return false
 	}
 	mediaType, _, _ := mime.ParseMediaType(header.Get("Content-Type"))
@@ -198,6 +198,23 @@ func shouldCompressSize(r *http.Request, w *responseBuffer, gzipQ, identityQ flo
 	}
 	return true
 }
+
+func hasNoTransform(header http.Header) bool {
+	for _, value := range header.Values("Cache-Control") {
+		directives, valid := httpx.SplitDelimited(value, ',', len(value), len(value))
+		if !valid {
+			return true
+		}
+		for _, directive := range directives {
+			name, _, _ := strings.Cut(directive, "=")
+			if strings.EqualFold(strings.TrimSpace(name), "no-transform") {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func (w *responseBuffer) startGzip(payload []byte, level int) (int, error) {
 	w.compressed = true
 	header := compressedHeader(w.responseHeader())

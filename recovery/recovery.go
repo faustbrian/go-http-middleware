@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"runtime"
-	"runtime/debug"
 
 	"github.com/faustbrian/go-http-middleware/internal/httpx"
 )
@@ -75,9 +74,8 @@ func New(policy Policy) (func(http.Handler) http.Handler, error) {
 				}
 				event := Event{Class: class, Committed: recorder.Committed}
 				if policy.CaptureStack {
-					stack := debug.Stack()
-					stack = stack[:min(len(stack), policy.MaxStackBytes)]
-					event.Stack = append([]byte(nil), stack...)
+					stack := make([]byte, policy.MaxStackBytes)
+					event.Stack = stack[:runtime.Stack(stack, false)]
 				}
 				observe(policy.Observer, event)
 				if !recorder.Committed {

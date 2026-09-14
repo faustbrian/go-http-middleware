@@ -87,3 +87,37 @@ func TestMalformedAcceptQualityFailsClosed(t *testing.T) {
 		}
 	}
 }
+
+func TestContentTypeUsesConfiguredHeaderByteBudget(t *testing.T) {
+	t.Parallel()
+
+	middleware, err := content.New(content.Policy{
+		RequestTypes:   []string{"application/json"},
+		MaxHeaderBytes: len("application/json"),
+	})
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
+	request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader("{}"))
+	request.Header.Set("Content-Type", "application/json; charset=utf-8")
+	called := false
+	recorder := httptest.NewRecorder()
+	middleware(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+		called = true
+	})).ServeHTTP(recorder, request)
+	if called || recorder.Code != http.StatusUnsupportedMediaType {
+		t.Fatalf("application called = %v, status = %d", called, recorder.Code)
+	}
+
+	request = httptest.NewRequest(http.MethodPost, "/", strings.NewReader("{}"))
+	request.Header.Set("Content-Type", "application/json")
+	called = false
+	recorder = httptest.NewRecorder()
+	middleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		called = true
+		w.WriteHeader(http.StatusNoContent)
+	})).ServeHTTP(recorder, request)
+	if !called || recorder.Code != http.StatusNoContent {
+		t.Fatalf("exact-limit application called = %v, status = %d", called, recorder.Code)
+	}
+}

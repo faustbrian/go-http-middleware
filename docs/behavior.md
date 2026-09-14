@@ -27,7 +27,7 @@ allowlist before constructing an absolute URL.
 | non-credentialed wildcard origin | emit `*`; no origin variation needed |
 | credentials with any wildcard | constructor error |
 | invalid or denied simple origin | pass application response without allow fields |
-| invalid preflight syntax | `400`, no allow fields |
+| invalid preflight origin or control-field syntax | `400`, no allow fields and no application execution |
 | denied origin, method, header, or private network | `403`, no allow fields |
 | accepted preflight | `204`, or application response when pass-through is set |
 
