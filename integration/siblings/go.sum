@@ -17,8 +17,8 @@ github.com/faustbrian/go-correlation v1.0.0 h1:2Z+tlY59nNBdlGFBadPTeuDo9/029IvS/
 github.com/faustbrian/go-correlation v1.0.0/go.mod h1:upLcV0fqKC8IUUx11R6c69CVwC3DO1EeXsw2BQU2PKE=
 github.com/faustbrian/go-http-client v1.0.0 h1:rbkKl2jfojTLJIsFwRWQa/7mbiO+/VKU6dv1Tt806QQ=
 github.com/faustbrian/go-http-client v1.0.0/go.mod h1:6TTp/UfA5TmhXRbFQwLKltShi7F+wF2nBwyubwKIoTw=
-github.com/faustbrian/go-http-middleware v1.0.0 h1:0eRjJA11oiuKPfGosGAiH1idOx2pWKqdpQmXUScv/Z8=
-github.com/faustbrian/go-http-middleware v1.0.0/go.mod h1:0pbY13Tp7yL9i5LKkZ4Y6sOTgmSSLyRTINj0flLtWyk=
+github.com/faustbrian/go-http-middleware/v2 v2.0.0 h1:Z+iAXAbV2/lfPybHFHGfK+//aUmnLFuDRG2kGswWIjg=
+github.com/faustbrian/go-http-middleware/v2 v2.0.0/go.mod h1:3nutDUpOvxPVCir43Ctq7d2rqtdUSiSmoGHIOObMJdc=
 github.com/faustbrian/go-identifier v1.0.0 h1:5lXZbS2wK4NelWv4ekRocwOwjkWt1ch/nh7TScxsFO4=
 github.com/faustbrian/go-identifier v1.0.0/go.mod h1:Q2yS7Hk4N4i9Wd3OmPQGh657SHtA1IjvtT4PllphNlY=
 github.com/faustbrian/go-json-schema v1.0.0 h1:clgfSg5qL5wvrbZz6klFUQlH+dc9E0l2RFCWyAw8Qrk=

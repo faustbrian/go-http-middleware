@@ -17,6 +17,9 @@ All sibling module versions are pinned in [`go.mod`](go.mod). The harness uses
 in-memory handlers and `httptest`; it does not require a deployed service or
 other external runtime.
 
+The current middleware dependency is the published `/v2` v2.0.0 module.
+Other independently released sibling modules retain their pinned versions.
+
 Run the contract for every declared module from the repository root:
 
 ```sh

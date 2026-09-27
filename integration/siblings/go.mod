@@ -7,7 +7,7 @@ require (
 	github.com/faustbrian/go-authorization v1.0.0
 	github.com/faustbrian/go-correlation v1.0.0
 	github.com/faustbrian/go-http-client v1.0.0
-	github.com/faustbrian/go-http-middleware v1.0.0
+	github.com/faustbrian/go-http-middleware/v2 v2.0.0
 	github.com/faustbrian/go-jsonapi v1.0.0
 	github.com/faustbrian/go-jsonrpc v1.0.0
 	github.com/faustbrian/go-log v1.0.0

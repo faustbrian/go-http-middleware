@@ -9,9 +9,9 @@ import (
 
 	"github.com/faustbrian/go-correlation"
 	httpcorrelation "github.com/faustbrian/go-correlation/http"
-	middleware "github.com/faustbrian/go-http-middleware"
-	"github.com/faustbrian/go-http-middleware/adapter"
-	"github.com/faustbrian/go-http-middleware/observe"
+	middleware "github.com/faustbrian/go-http-middleware/v2"
+	"github.com/faustbrian/go-http-middleware/v2/adapter"
+	"github.com/faustbrian/go-http-middleware/v2/observe"
 	router "github.com/faustbrian/go-router"
 	"github.com/faustbrian/go-service/serverhttp"
 )
