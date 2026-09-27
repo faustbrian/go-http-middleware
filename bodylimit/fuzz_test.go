@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/faustbrian/go-http-middleware/bodylimit"
+	"github.com/faustbrian/go-http-middleware/v2/bodylimit"
 )
 
 func FuzzBodyLimit(f *testing.F) {

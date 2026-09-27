@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faustbrian/go-http-middleware/admission"
+	"github.com/faustbrian/go-http-middleware/v2/admission"
 )
 
 func TestImmediateAdmissionRejectsAboveLimitAndReleasesPermit(t *testing.T) {

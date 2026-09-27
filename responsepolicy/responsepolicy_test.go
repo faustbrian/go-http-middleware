@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/faustbrian/go-http-middleware/responsepolicy"
+	"github.com/faustbrian/go-http-middleware/v2/responsepolicy"
 )
 
 func TestNoStoreAppliesToEveryDownstreamStatus(t *testing.T) {

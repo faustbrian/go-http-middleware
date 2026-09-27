@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/faustbrian/go-http-middleware/secureheader"
+	"github.com/faustbrian/go-http-middleware/v2/secureheader"
 )
 
 func FuzzConfiguredHeaderValues(f *testing.F) {

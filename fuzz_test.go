@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	middleware "github.com/faustbrian/go-http-middleware"
+	middleware "github.com/faustbrian/go-http-middleware/v2"
 )
 
 func FuzzDescriptorNames(f *testing.F) {

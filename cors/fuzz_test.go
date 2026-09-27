@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/faustbrian/go-http-middleware/cors"
+	"github.com/faustbrian/go-http-middleware/v2/cors"
 )
 
 func FuzzOriginAndPreflight(f *testing.F) {

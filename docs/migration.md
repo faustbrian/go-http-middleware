@@ -1,5 +1,25 @@
 # Migration guide
 
+## Version 2
+
+Use Go 1.27.0 or newer and require
+`github.com/faustbrian/go-http-middleware/v2 v2.0.0` once that version is
+published. Update every root and subpackage import to include `/v2`, including
+`adapter` and `middlewaretest`. Package names and exported symbols are
+otherwise unchanged. Do not create a version-specific source directory.
+
+Malformed CORS preflights fail closed before application routing, and the
+configured content-negotiation byte limit applies to Content-Type before
+parsing. Honor these rejections rather than relying on the old fallthrough.
+Compression honors no-transform on every Cache-Control field line, and panic
+stack capture uses the configured bounded buffer.
+
+The nested `integration/siblings` module is a non-releasable harness with its
+own identity. It deliberately retains the published v1 dependency until v2
+is public; it is not evidence that v2 consumers have migrated. The same
+publication boundary applies to sibling-owned consumer harnesses. Source
+preparation and the dated changelog do not establish tag or release publication.
+
 ## Ad hoc net/http
 
 Inventory every existing wrapper, its request order, response order, short

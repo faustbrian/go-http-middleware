@@ -1,4 +1,4 @@
-module github.com/faustbrian/go-http-middleware
+module github.com/faustbrian/go-http-middleware/v2
 
 go 1.27.0
 

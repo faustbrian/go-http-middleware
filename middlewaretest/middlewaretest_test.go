@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/faustbrian/go-http-middleware/middlewaretest"
+	"github.com/faustbrian/go-http-middleware/v2/middlewaretest"
 )
 
 func TestTraceRecordsRequestAndResponseOrderSafely(t *testing.T) {

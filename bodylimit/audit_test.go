@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/faustbrian/go-http-middleware/bodylimit"
+	"github.com/faustbrian/go-http-middleware/v2/bodylimit"
 )
 
 func TestLimitCountsEncodedAndMultipartTransportBytes(t *testing.T) {

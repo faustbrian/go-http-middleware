@@ -6,7 +6,7 @@ import (
 	"net/netip"
 	"testing"
 
-	"github.com/faustbrian/go-http-middleware/proxy"
+	"github.com/faustbrian/go-http-middleware/v2/proxy"
 )
 
 func FuzzForwardedField(f *testing.F) {

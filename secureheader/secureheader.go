@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/faustbrian/go-http-middleware/internal/httpx"
+	"github.com/faustbrian/go-http-middleware/v2/internal/httpx"
 )
 
 // ExistingPolicy controls configured versus downstream header precedence.

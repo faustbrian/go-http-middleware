@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/faustbrian/go-http-middleware/compress"
+	"github.com/faustbrian/go-http-middleware/v2/compress"
 )
 
 func TestGzipNegotiationHonorsQualityAndMergesVary(t *testing.T) {

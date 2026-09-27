@@ -1,7 +1,7 @@
 # Documentation
 
 - [Compiler-checked examples](../example_test.go)
-- [Testing helpers](https://pkg.go.dev/github.com/faustbrian/go-http-middleware/middlewaretest)
+- [Testing helpers](https://pkg.go.dev/github.com/faustbrian/go-http-middleware/v2/middlewaretest)
 - [API reference](api.md)
 - [Architecture](architecture.md)
 - [Ordering](ordering.md)

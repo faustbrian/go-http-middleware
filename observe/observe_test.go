@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/faustbrian/go-http-middleware/observe"
+	"github.com/faustbrian/go-http-middleware/v2/observe"
 )
 
 func TestObserverReceivesOneBoundedCompletionEvent(t *testing.T) {

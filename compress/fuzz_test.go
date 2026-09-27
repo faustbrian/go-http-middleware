@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/faustbrian/go-http-middleware/compress"
+	"github.com/faustbrian/go-http-middleware/v2/compress"
 )
 
 func FuzzAcceptEncoding(f *testing.F) {

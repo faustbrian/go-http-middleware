@@ -8,8 +8,8 @@ import (
 
 	"go.uber.org/goleak"
 
-	"github.com/faustbrian/go-http-middleware/admission"
-	"github.com/faustbrian/go-http-middleware/deadline"
+	"github.com/faustbrian/go-http-middleware/v2/admission"
+	"github.com/faustbrian/go-http-middleware/v2/deadline"
 )
 
 func TestNoLeaks(t *testing.T) {

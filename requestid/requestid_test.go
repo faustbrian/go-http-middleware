@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/faustbrian/go-http-middleware/requestid"
+	"github.com/faustbrian/go-http-middleware/v2/requestid"
 )
 
 func TestUntrustedInboundIdentifierIsReplacedAndPropagated(t *testing.T) {

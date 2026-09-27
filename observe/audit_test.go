@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/faustbrian/go-http-middleware/observe"
+	"github.com/faustbrian/go-http-middleware/v2/observe"
 )
 
 func TestObserverSlownessIsSynchronousAndCreatesNoWorker(t *testing.T) {

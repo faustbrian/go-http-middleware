@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"runtime"
 
-	"github.com/faustbrian/go-http-middleware/internal/httpx"
+	"github.com/faustbrian/go-http-middleware/v2/internal/httpx"
 )
 
 // Class is deliberately bounded and never includes the panic value.

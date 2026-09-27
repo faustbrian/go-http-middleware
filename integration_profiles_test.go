@@ -9,15 +9,15 @@ import (
 	"strings"
 	"testing"
 
-	middleware "github.com/faustbrian/go-http-middleware"
-	"github.com/faustbrian/go-http-middleware/bodylimit"
-	compressmw "github.com/faustbrian/go-http-middleware/compress"
-	"github.com/faustbrian/go-http-middleware/content"
-	"github.com/faustbrian/go-http-middleware/cors"
-	"github.com/faustbrian/go-http-middleware/observe"
-	"github.com/faustbrian/go-http-middleware/recovery"
-	"github.com/faustbrian/go-http-middleware/responsepolicy"
-	"github.com/faustbrian/go-http-middleware/secureheader"
+	middleware "github.com/faustbrian/go-http-middleware/v2"
+	"github.com/faustbrian/go-http-middleware/v2/bodylimit"
+	compressmw "github.com/faustbrian/go-http-middleware/v2/compress"
+	"github.com/faustbrian/go-http-middleware/v2/content"
+	"github.com/faustbrian/go-http-middleware/v2/cors"
+	"github.com/faustbrian/go-http-middleware/v2/observe"
+	"github.com/faustbrian/go-http-middleware/v2/recovery"
+	"github.com/faustbrian/go-http-middleware/v2/responsepolicy"
+	"github.com/faustbrian/go-http-middleware/v2/secureheader"
 )
 
 func TestRepresentativeJSONRPCProfile(t *testing.T) {

@@ -15,14 +15,14 @@ import (
 	"testing"
 	"time"
 
-	middleware "github.com/faustbrian/go-http-middleware"
-	compressmw "github.com/faustbrian/go-http-middleware/compress"
-	"github.com/faustbrian/go-http-middleware/cors"
-	"github.com/faustbrian/go-http-middleware/deadline"
-	"github.com/faustbrian/go-http-middleware/observe"
-	"github.com/faustbrian/go-http-middleware/recovery"
-	"github.com/faustbrian/go-http-middleware/responsepolicy"
-	"github.com/faustbrian/go-http-middleware/secureheader"
+	middleware "github.com/faustbrian/go-http-middleware/v2"
+	compressmw "github.com/faustbrian/go-http-middleware/v2/compress"
+	"github.com/faustbrian/go-http-middleware/v2/cors"
+	"github.com/faustbrian/go-http-middleware/v2/deadline"
+	"github.com/faustbrian/go-http-middleware/v2/observe"
+	"github.com/faustbrian/go-http-middleware/v2/recovery"
+	"github.com/faustbrian/go-http-middleware/v2/responsepolicy"
+	"github.com/faustbrian/go-http-middleware/v2/secureheader"
 )
 
 func TestRealListenerHTTP1AndHTTP2PreserveFlushAndTrailers(t *testing.T) {

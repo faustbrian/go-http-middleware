@@ -4,6 +4,17 @@ This project follows Semantic Versioning and Keep a Changelog.
 
 ## Unreleased
 
+## [2.0.0] - 2026-09-27
+
+### Breaking
+
+- Require Go 1.27.0 and migrate the root module and all public package imports
+  to `github.com/faustbrian/go-http-middleware/v2`. The source remains at the
+  repository root on main; v1 consumers retain their published dependency.
+- Malformed CORS preflights now fail closed before application routing, and
+  oversized Content-Type fields are rejected before parsing. Applications
+  must not rely on malformed envelopes reaching their handlers.
+
 ### Fixed
 
 - Reject malformed CORS preflight envelopes before application routing,

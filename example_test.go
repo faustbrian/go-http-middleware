@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	middleware "github.com/faustbrian/go-http-middleware"
-	"github.com/faustbrian/go-http-middleware/requestid"
+	middleware "github.com/faustbrian/go-http-middleware/v2"
+	"github.com/faustbrian/go-http-middleware/v2/requestid"
 )
 
 func ExampleChain() {
