@@ -386,7 +386,7 @@
         "github.com/faustbrian/go-jsonrpc",
         "github.com/faustbrian/go-log",
         "github.com/faustbrian/go-openapi",
-        "github.com/faustbrian/go-router",
+        "github.com/faustbrian/go-router/v2",
         "github.com/faustbrian/go-service"
       ],
       "reverse_owned_dependencies": [],

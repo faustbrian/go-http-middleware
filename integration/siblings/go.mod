@@ -12,7 +12,7 @@ require (
 	github.com/faustbrian/go-jsonrpc v1.0.0
 	github.com/faustbrian/go-log v1.0.0
 	github.com/faustbrian/go-openapi v1.0.0
-	github.com/faustbrian/go-router v1.0.0
+	github.com/faustbrian/go-router/v2 v2.0.0
 	github.com/faustbrian/go-service v1.0.0
 )
 

@@ -12,7 +12,7 @@ import (
 	middleware "github.com/faustbrian/go-http-middleware/v2"
 	"github.com/faustbrian/go-http-middleware/v2/adapter"
 	"github.com/faustbrian/go-http-middleware/v2/observe"
-	router "github.com/faustbrian/go-router"
+	router "github.com/faustbrian/go-router/v2"
 	"github.com/faustbrian/go-service/serverhttp"
 )
 

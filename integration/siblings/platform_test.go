@@ -23,7 +23,7 @@ import (
 	"github.com/faustbrian/go-log/handler/capture"
 	openapi "github.com/faustbrian/go-openapi"
 	"github.com/faustbrian/go-openapi/parse"
-	router "github.com/faustbrian/go-router"
+	router "github.com/faustbrian/go-router/v2"
 	"github.com/faustbrian/go-service/serverhttp"
 )
 

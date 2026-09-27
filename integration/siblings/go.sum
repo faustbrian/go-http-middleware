@@ -31,8 +31,8 @@ github.com/faustbrian/go-log v1.0.0 h1:OFH4CgQyIB+WGlKxXlWuJgK178sAmVUKVQBl3FwJg
 github.com/faustbrian/go-log v1.0.0/go.mod h1:hwFD9uvNXWat2MF855ncxF4opNWHjhsErO/mE6SUN6E=
 github.com/faustbrian/go-openapi v1.0.0 h1:I78okn/4twfERabfwrMwSwQCt66mPz0FZF+2qz0tUGQ=
 github.com/faustbrian/go-openapi v1.0.0/go.mod h1:mfPnE2VDlthZVCYI7UBM6RYMZQjMFUUHYtbBNTfs2BY=
-github.com/faustbrian/go-router v1.0.0 h1:IVmr77g62jbkGI7RyaMbTigdc7u7LanBvubBw+X0rvE=
-github.com/faustbrian/go-router v1.0.0/go.mod h1:oAtgnYtUx0nj52izJeWzh7bahDcEBQq4mF5na0yd6qw=
+github.com/faustbrian/go-router/v2 v2.0.0 h1:h2yNzDsp24XY6QEX9QrvNym7AF2Ju3tRrE76QqRlq5M=
+github.com/faustbrian/go-router/v2 v2.0.0/go.mod h1:7i5FJoyBrTsGUVI/uIVXB/GrbqOy/47GG6Cz2mAf47U=
 github.com/faustbrian/go-service v1.0.0 h1:sxfwxfsHxD2EjsDthb+u29xpp3qMtUSu/LT5lPd8e4Q=
 github.com/faustbrian/go-service v1.0.0/go.mod h1:2klNLQJfgrbRX2N41iLSEPVFwLmyg4nMVQ+kWZZudAc=
 github.com/felixge/httpsnoop v1.1.0 h1:3YtUj32ZZkqZtt3sZZsClsymw/QDuVfpNhoA31zeORc=
