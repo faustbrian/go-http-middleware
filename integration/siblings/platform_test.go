@@ -19,8 +19,8 @@ import (
 	httpclient "github.com/faustbrian/go-http-client"
 	jsonapi "github.com/faustbrian/go-jsonapi"
 	jsonrpc "github.com/faustbrian/go-jsonrpc"
-	log "github.com/faustbrian/go-log"
-	"github.com/faustbrian/go-log/handler/capture"
+	log "github.com/faustbrian/go-log/v2"
+	"github.com/faustbrian/go-log/v2/handler/capture"
 	openapi "github.com/faustbrian/go-openapi"
 	"github.com/faustbrian/go-openapi/parse"
 	router "github.com/faustbrian/go-router/v2"
@@ -42,9 +42,9 @@ func TestServiceComposesHTTPClientLoggingAuthenticationAuthorizationAndJSONAPI(
 	t.Parallel()
 
 	logs := capture.New()
-	logger, err := log.New(logs)
+	logger, err := log.TrustedNew(logs)
 	if err != nil {
-		t.Fatalf("log.New() error = %v", err)
+		t.Fatalf("log.TrustedNew() error = %v", err)
 	}
 	extractor, err := authenticationhttp.NewExtractor(
 		authenticationhttp.BearerAuthorization(),
