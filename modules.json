@@ -384,7 +384,7 @@
         "github.com/faustbrian/go-identifier",
         "github.com/faustbrian/go-jsonapi",
         "github.com/faustbrian/go-jsonrpc",
-        "github.com/faustbrian/go-log",
+        "github.com/faustbrian/go-log/v2",
         "github.com/faustbrian/go-openapi",
         "github.com/faustbrian/go-router/v2",
         "github.com/faustbrian/go-service"
