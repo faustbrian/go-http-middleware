@@ -19,7 +19,7 @@ The exact audited sibling revisions and ownership table are recorded in
 
 ## Authentication and authorization
 
-Wrap `authhttp.NewMiddleware` from `authentication` with
+Wrap `NewMiddleware` from `authentication/v2/adapters/http` with
 `adapter.Named(adapter.Authentication, middleware)`. Wrap the handler returned
 by `authorization/authhttp` at the declared authorization position. This
 package never parses credentials or decides access.
