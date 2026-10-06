@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 	"time"
 
@@ -45,9 +46,22 @@ func TestImmediateAdmissionRejectsAboveLimitAndReleasesPermit(t *testing.T) {
 func TestBoundedWaitHonorsCancellationWithoutLeakingPermit(t *testing.T) {
 	t.Parallel()
 
-	middleware, _ := admission.New(admission.Policy{MaxInFlight: 1, MaxWaiters: 1, Wait: time.Second})
+	middleware, err := admission.New(admission.Policy{MaxInFlight: 1, MaxWaiters: 1, Wait: time.Second})
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
 	block := make(chan struct{})
-	entered := make(chan struct{})
+	entered := make(chan struct{}, 1)
+	done := make(chan struct{})
+	var release sync.Once
+	t.Cleanup(func() {
+		release.Do(func() { close(block) })
+		select {
+		case <-done:
+		case <-time.After(2 * time.Second):
+			t.Error("admitted holder did not finish during cleanup")
+		}
+	})
 	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		select {
 		case entered <- struct{}{}:
@@ -56,8 +70,15 @@ func TestBoundedWaitHonorsCancellationWithoutLeakingPermit(t *testing.T) {
 		<-block
 		w.WriteHeader(http.StatusNoContent)
 	}))
-	go handler.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/", nil))
-	<-entered
+	go func() {
+		handler.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/", nil))
+		close(done)
+	}()
+	select {
+	case <-entered:
+	case <-time.After(2 * time.Second):
+		t.Fatal("first request did not enter the admitted handler")
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	recorder := httptest.NewRecorder()
@@ -65,7 +86,19 @@ func TestBoundedWaitHonorsCancellationWithoutLeakingPermit(t *testing.T) {
 	if recorder.Code != http.StatusRequestTimeout {
 		t.Fatalf("status = %d", recorder.Code)
 	}
-	close(block)
+	release.Do(func() { close(block) })
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("admitted holder did not finish after release")
+	}
+	reused := httptest.NewRecorder()
+	middleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	})).ServeHTTP(reused, httptest.NewRequest(http.MethodGet, "/", nil))
+	if reused.Code != http.StatusNoContent {
+		t.Fatalf("status after cancellation and holder release = %d, want 204", reused.Code)
+	}
 }
 
 func TestShutdownRejectsNewAndWaitingAdmissions(t *testing.T) {

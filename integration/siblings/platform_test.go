@@ -17,7 +17,7 @@ import (
 	authorizationhttp "github.com/faustbrian/go-authorization/authhttp"
 	"github.com/faustbrian/go-authorization/authn"
 	httpclient "github.com/faustbrian/go-http-client"
-	jsonapi "github.com/faustbrian/go-jsonapi"
+	jsonapi "github.com/faustbrian/go-jsonapi/v2"
 	jsonrpc "github.com/faustbrian/go-jsonrpc"
 	log "github.com/faustbrian/go-log/v2"
 	"github.com/faustbrian/go-log/v2/handler/capture"
