@@ -4,6 +4,11 @@ This project follows Semantic Versioning and Keep a Changelog.
 
 ## Unreleased
 
+### Changed
+
+- Adopt Correlation v1.1.2 and its canonical HTTP adapter in the internal
+  sibling harness, preserving request identity and explicit peer trust.
+
 ### Fixed
 
 - Preserve CORS origin identity when Unicode normalization encounters

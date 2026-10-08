@@ -5,16 +5,99 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"testing"
 
 	"github.com/faustbrian/go-correlation"
-	httpcorrelation "github.com/faustbrian/go-correlation/http"
+	httpcorrelation "github.com/faustbrian/go-correlation/adapters/http"
 	middleware "github.com/faustbrian/go-http-middleware/v2"
 	"github.com/faustbrian/go-http-middleware/v2/adapter"
 	"github.com/faustbrian/go-http-middleware/v2/observe"
 	router "github.com/faustbrian/go-router/v2"
 	"github.com/faustbrian/go-service/serverhttp"
 )
+
+func TestCorrelationHTTPIdentitySurvivesMiddlewareComposition(t *testing.T) {
+	t.Parallel()
+	uuidV4 := regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`)
+	for _, tc := range []struct {
+		name    string
+		trusted bool
+		invalid bool
+	}{
+		{name: "untrusted"},
+		{name: "trusted", trusted: true},
+		{name: "malformed", trusted: true, invalid: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			factory, err := correlation.NewFactory(correlation.FactoryOptions{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			identity, err := httpcorrelation.New(factory, httpcorrelation.Options{
+				Invalid: httpcorrelation.RejectInvalid,
+				Trust:   func(*http.Request) bool { return tc.trusted },
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			calls := 0
+			var observed correlation.Values
+			app := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				calls++
+				var ok bool
+				observed, ok = correlation.FromContext(r.Context())
+				if !ok || r.Header.Get("X-Correlation-ID") != observed.CorrelationID.String() ||
+					r.Header.Get("X-Request-ID") != observed.RequestID.String() ||
+					r.Header.Get("X-Causation-ID") != observed.CausationID.String() {
+					t.Error("request headers and context identity differ")
+				}
+				w.WriteHeader(http.StatusNoContent)
+			})
+			chain, err := middleware.New(identity.Wrap)
+			if err != nil {
+				t.Fatal(err)
+			}
+			handler, err := chain.Handler(app)
+			if err != nil {
+				t.Fatal(err)
+			}
+			request := httptest.NewRequest(http.MethodGet, "/", nil)
+			request.Header.Set("X-Correlation-ID", "workflow-1")
+			request.Header.Set("X-Request-ID", "previous-hop")
+			request.Header.Set("X-Causation-ID", "older-hop")
+			if tc.invalid {
+				request.Header.Set("X-Correlation-ID", "not valid")
+			}
+			response := httptest.NewRecorder()
+			handler.ServeHTTP(response, request)
+			if tc.invalid {
+				if response.Code != http.StatusBadRequest || calls != 0 {
+					t.Fatalf("malformed response=%d calls=%d", response.Code, calls)
+				}
+				return
+			}
+			if response.Code != http.StatusNoContent || calls != 1 {
+				t.Fatalf("response=%d calls=%d", response.Code, calls)
+			}
+			if !uuidV4.MatchString(observed.RequestID.String()) {
+				t.Fatalf("request ID is not canonical UUIDv4: %q", observed.RequestID)
+			}
+			if tc.trusted {
+				if observed.CorrelationID != "workflow-1" || observed.CausationID != "previous-hop" {
+					t.Fatalf("trusted identity=%+v", observed)
+				}
+			} else if !uuidV4.MatchString(observed.CorrelationID.String()) || observed.CausationID != "" {
+				t.Fatalf("untrusted identity=%+v", observed)
+			}
+			if response.Header().Get("X-Correlation-ID") != observed.CorrelationID.String() ||
+				response.Header().Get("X-Request-ID") != observed.RequestID.String() ||
+				response.Header().Get("X-Causation-ID") != observed.CausationID.String() {
+				t.Fatal("response headers and context identity differ")
+			}
+		})
+	}
+}
 
 func TestGoRouterProvidesBoundedObservationMetadata(t *testing.T) {
 	t.Parallel()
