@@ -4,6 +4,12 @@ This project follows Semantic Versioning and Keep a Changelog.
 
 ## Unreleased
 
+### Fixed
+
+- Preserve CORS origin identity when Unicode normalization encounters
+  supplementary characters or intervening starters by updating the IDNA
+  dependency graph. Add public allowlist and dynamic-policy regressions.
+
 ## [2.0.0] - 2026-09-27
 
 ### Breaking
