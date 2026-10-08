@@ -8,7 +8,8 @@ The tests prove three boundaries:
 
 - `siblings_test.go` checks bounded router observation metadata and rejects
   duplicate ownership of recovery, request identifiers, and body limits when
-  `service/serverhttp` already owns those concerns.
+  `service/serverhttp` already owns those concerns. It also exercises Correlation
+  HTTP request identity, explicit peer trust, and malformed-header rejection.
 - `platform_test.go` exercises an in-memory service composition spanning the
   HTTP client, logging, authentication, authorization, JSON:API, JSON-RPC,
   OpenAPI, routing, and service HTTP composition.
@@ -23,7 +24,8 @@ other external runtime.
 The middleware, HTTP client, and Authentication dependencies use their `/v2` modules.
 Authentication imports move together to preserve nominal type identity; its
 HTTP integration uses the canonical `adapters/http` package.
-Other independently released sibling modules retain their pinned versions.
+Correlation uses its canonical `adapters/http` package and identifier v2
+generation. Other independently released siblings retain their pinned versions.
 
 Run the contract for every declared module from the repository root:
 
