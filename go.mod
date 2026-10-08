@@ -9,6 +9,6 @@ require (
 )
 
 require (
-	github.com/stretchr/testify v1.11.1 // indirect
+	github.com/stretchr/testify v1.12.1 // indirect
 	golang.org/x/text v0.42.0 // indirect
 )
