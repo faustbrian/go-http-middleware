@@ -14,7 +14,7 @@ import (
 	authenticationhttp "github.com/faustbrian/go-authentication/v2/adapters/http"
 	"github.com/faustbrian/go-authentication/v2/bearer"
 	authorization "github.com/faustbrian/go-authorization"
-	authorizationhttp "github.com/faustbrian/go-authorization/authhttp"
+	authorizationhttp "github.com/faustbrian/go-authorization/adapters/http"
 	"github.com/faustbrian/go-authorization/authn"
 	httpclient "github.com/faustbrian/go-http-client/v2"
 	jsonapi "github.com/faustbrian/go-jsonapi/v2"

@@ -6,6 +6,11 @@ This project follows Semantic Versioning and Keep a Changelog.
 
 ### Changed
 
+- Refresh test-only Testify to v1.12.1 and adopt Authorization v1.1.0
+  through its canonical HTTP adapter in the internal sibling harness.
+  Preserve authenticated identity and fail-closed authorization, including
+  mapping errors, invalid decisions, and configured rejection handlers.
+
 - Adopt Correlation v1.1.2 and its canonical HTTP adapter in the internal
   sibling harness, preserving request identity and explicit peer trust.
 
