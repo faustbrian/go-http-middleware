@@ -26,8 +26,8 @@ github.com/faustbrian/go-jsonapi/v2 v2.0.0 h1:4CFe9HA28DxRSN+H3eAMjgfe637WXzvCNU
 github.com/faustbrian/go-jsonapi/v2 v2.0.0/go.mod h1:MV6Dr+s3ii1yQK/FIZ9Z861Z+7ToQhiuxvZssu1nSEY=
 github.com/faustbrian/go-jsonrpc v1.1.1 h1:vxUzoj5o2CvlXtQDRKbyb8aP9FXvE+j937jEWMARORc=
 github.com/faustbrian/go-jsonrpc v1.1.1/go.mod h1:thOSBE3KGGNbPHY/OcreIcDPwusQ273v61n6TlmJdxE=
-github.com/faustbrian/go-log/v2 v2.0.0 h1:VQIEvZfXXEYXoTeavlEeMT1YtinFV1KDFAMyNhixQ7o=
-github.com/faustbrian/go-log/v2 v2.0.0/go.mod h1:FJ34JaICS4Lda+67LUgNp4e4S3y2GBl0l3UsvIqrVFY=
+github.com/faustbrian/go-log/v2 v2.0.1 h1:d6pSm3yVCLvatx8hg9PqlkVmYNAMqGVxKW5AK8xDdXI=
+github.com/faustbrian/go-log/v2 v2.0.1/go.mod h1:0qSGpeNUjpigrUjeGM3kGJTB1xW0GYuWsTnakvf5DdM=
 github.com/faustbrian/go-openapi v1.0.0 h1:I78okn/4twfERabfwrMwSwQCt66mPz0FZF+2qz0tUGQ=
 github.com/faustbrian/go-openapi v1.0.0/go.mod h1:mfPnE2VDlthZVCYI7UBM6RYMZQjMFUUHYtbBNTfs2BY=
 github.com/faustbrian/go-router/v2 v2.0.0 h1:h2yNzDsp24XY6QEX9QrvNym7AF2Ju3tRrE76QqRlq5M=
