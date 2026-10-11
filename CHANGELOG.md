@@ -4,6 +4,8 @@ This project follows Semantic Versioning and Keep a Changelog.
 
 ## Unreleased
 
+## [2.0.1] - 2026-10-11
+
 ### Changed
 
 - Refresh test-only Testify to v1.12.1 and adopt Authorization v1.1.0

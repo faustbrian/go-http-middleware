@@ -3,8 +3,8 @@
 ## Version 2
 
 Use Go 1.27.0 or newer and require
-`github.com/faustbrian/go-http-middleware/v2 v2.0.0` once that version is
-published. Update every root and subpackage import to include `/v2`, including
+the published `github.com/faustbrian/go-http-middleware/v2 v2.0.0` or a
+newer v2 release. Update every root and subpackage import to include `/v2`, including
 `adapter` and `middlewaretest`. Package names and exported symbols are
 otherwise unchanged. Do not create a version-specific source directory.
 
@@ -15,10 +15,11 @@ Compression honors no-transform on every Cache-Control field line, and panic
 stack capture uses the configured bounded buffer.
 
 The nested `integration/siblings` module is a non-releasable harness with its
-own identity. It deliberately retains the published v1 dependency until v2
-is public; it is not evidence that v2 consumers have migrated. The same
-publication boundary applies to sibling-owned consumer harnesses. Source
-preparation and the dated changelog do not establish tag or release publication.
+own identity. It consumes the published Middleware v2.0.0 dependency and
+explicitly versioned sibling adapters. Its coverage does not establish that
+other consumers have migrated or that an unpublished patch has been released.
+Source preparation and the dated changelog do not establish tag or release
+publication.
 
 ## Ad hoc net/http
 
