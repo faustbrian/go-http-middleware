@@ -1,6 +1,10 @@
 # Verification evidence
 
-The release gate is reproducible from a clean checkout with `make ci`.
+The explicit full/release gate is reproducible from a clean checkout with
+`make check-full`. Ordinary `make check` and `make ci` select bounded local
+verification, not every campaign below. See
+[contributor verification](../CONTRIBUTING.md#verification) for deterministic
+seeds, focused active fuzzing and selected admission race assertions.
 No test requires a running database, proxy, cache, exporter, or other
 production service.
 
@@ -11,7 +15,7 @@ production service.
 | race safety | shared race gate; no race report |
 | meaningful coverage | shared coverage gate; every production package is 100.0% |
 | fuzz smoke | declared typed fuzz operations; every target completes without failure |
-| mutation | shared mutation gate; 59/59 curated security decisions killed |
+| mutation | shared full mutation gate; no surviving viable mutants |
 | leaks | shared tests include the middleware leak contract; no middleware-owned goroutine |
 | standards policies | shared tests and typed conformance operation; proxy, CORS, content, compression, and headers pass |
 | response capabilities | real HTTP/1.1 and HTTP/2 plus nested interface matrix pass |

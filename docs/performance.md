@@ -3,7 +3,7 @@
 `BenchmarkBaseAndDeepChains`, `BenchmarkRequestID`, `BenchmarkProxyParsing`,
 `BenchmarkCORSPreflight`, `BenchmarkCompression`, and
 `BenchmarkAdmissionContention` report allocations and latency with `-benchmem`.
-Run `make check` on the target architecture before setting budgets; the shared
+Run `make check-full` on the target architecture before setting budgets; the shared
 contract includes the benchmark gate.
 
 Base chains allocate only what their terminal and test writer require.

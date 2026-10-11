@@ -3,7 +3,7 @@
 [![CI](https://github.com/faustbrian/go-http-middleware/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/faustbrian/go-http-middleware/actions/workflows/ci.yml)
 [![CodeQL](https://img.shields.io/badge/CodeQL-required-blue)](https://github.com/faustbrian/go-http-middleware/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-100%25_required-blue)](CONTRIBUTING.md#verification)
-[![Mutation](https://img.shields.io/badge/mutation-100%25_required-blue)](CONTRIBUTING.md#verification)
+[![Mutation](https://img.shields.io/badge/mutation-local_and_scheduled-blue)](CONTRIBUTING.md#verification)
 [![Documentation](https://img.shields.io/badge/docs-checked_in_CI-blue)](docs/)
 [![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-http-middleware/v2.svg)](https://pkg.go.dev/github.com/faustbrian/go-http-middleware/v2)
 [![Release](https://img.shields.io/github/v/release/faustbrian/go-http-middleware?sort=semver)](https://github.com/faustbrian/go-http-middleware/releases)
@@ -139,21 +139,16 @@ review user-visible changes in the [changelog](CHANGELOG.md).
 ## Development
 
 ```sh
-make cohesion
-make check
+GOWORK=off go test ./...
 ```
 
-`make inventory` validates manifest consistency, `make cohesion` validates the
-module's ecosystem contract, and `make ci` runs the repository plus module
-contract. The pinned `go-library-tools` release in
-`.golib.yaml` owns generic verification; package-specific HTTP conformance and
-[sibling interoperability](integration/siblings/README.md) remain in the
-repository. Hosted release publication remains separate from local
-verification.
-
-The CI badge covers the blocking `quality`, `lint`, `staticcheck`, and
-`vulnerability` jobs. Release verification repeats `make check` before a
-signed provenance attestation and release assets are published.
+`make check` and `make ci` use bounded local checks with the pinned public
+verifier in `.golib.yaml`; `make check-full` retains explicit full assurance,
+HTTP conformance and owned public-dependency interoperability. See
+[contributor verification](CONTRIBUTING.md#verification) for isolated module
+tests, fuzz seeds versus active exploration and optional local mutation.
+The CI badge reflects the workflow's Required result; release qualification
+and publication remain separate boundaries.
 
 ## License
 
