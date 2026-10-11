@@ -32,10 +32,10 @@ Specification Decisions
 section of the pull request template. An unresolved interpretation or stale
 source pin is release-blocking; peer behavior cannot silently select policy.
 
-Full scheduled and release mutation gates must finish with zero surviving viable
+Selected full mutation qualification must finish with zero surviving viable
 mutants. Local mutation is optional, not a universal contribution prerequisite.
 
-Do not add package-local workflows, permanent replacements, machine-specific
+Do not fork shared verification workflows, add permanent replacements, machine-specific
 paths, bypass flags, broad mutation exclusions, or aggregate quality metrics
 that hide a failing package.
 
@@ -94,6 +94,28 @@ qualification remains `golib release dry-run --module .` and the
 [release preconditions](docs/release.md). Report unavailable, skipped and failed
 boundaries honestly; local tests are not full assurance, hosted-CI or public
 release qualification.
+
+## Selected Scheduled Assurance
+
+The separate [selected-assurance caller](.github/workflows/assurance.yml) runs
+only on main, every Saturday at 04:11 UTC. It rotates one current declared root
+fuzz target for 30 seconds, exploring:
+descriptor validity, request/body/header limits, proxy trust, CORS and
+content negotiation boundaries.
+The eight declared root-module targets use in-process HTTP fixtures, not a
+live deployment. The owned sibling interoperability harness and full HTTP
+conformance remain separate.
+
+Base-free ordinary checks execute deterministic seeds, not active exploration;
+committed-range CI selects affected active smoke. Manual assurance requires an
+exact anchored selector from the root fuzz operation in `.golib.yaml`, for
+example `^FuzzBodyLimit$`.
+Empty, unknown and malformed selections refuse.
+The shared job bounds setup and execution to ten minutes, active workers and
+CPU to two, owned memory to 2 GiB, native output to 1 MiB and private-cache
+lifetime. Failure, cancellation, exhausted budgets and cleanup refusal remain
+attributable failures. This lane does not run mutation or replace Required,
+explicit `make check-full`, or relevant release qualification.
 
 ## Adding A Module
 
