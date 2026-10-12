@@ -24,8 +24,8 @@ github.com/faustbrian/go-json-schema v1.0.0 h1:clgfSg5qL5wvrbZz6klFUQlH+dc9E0l2R
 github.com/faustbrian/go-json-schema v1.0.0/go.mod h1:8FEVyrKHwaYqo+fG+dIaVaFiF9m1Ut/fHpk6WcIE1fE=
 github.com/faustbrian/go-jsonapi/v2 v2.0.0 h1:4CFe9HA28DxRSN+H3eAMjgfe637WXzvCNUyAn3+WJQ0=
 github.com/faustbrian/go-jsonapi/v2 v2.0.0/go.mod h1:MV6Dr+s3ii1yQK/FIZ9Z861Z+7ToQhiuxvZssu1nSEY=
-github.com/faustbrian/go-jsonrpc v1.1.1 h1:vxUzoj5o2CvlXtQDRKbyb8aP9FXvE+j937jEWMARORc=
-github.com/faustbrian/go-jsonrpc v1.1.1/go.mod h1:thOSBE3KGGNbPHY/OcreIcDPwusQ273v61n6TlmJdxE=
+github.com/faustbrian/go-jsonrpc v1.1.2 h1:Gp//DHKNPGNUOklhjxKIhE6UipxY9y3otiqk7GUiyLY=
+github.com/faustbrian/go-jsonrpc v1.1.2/go.mod h1:thOSBE3KGGNbPHY/OcreIcDPwusQ273v61n6TlmJdxE=
 github.com/faustbrian/go-log/v2 v2.0.1 h1:d6pSm3yVCLvatx8hg9PqlkVmYNAMqGVxKW5AK8xDdXI=
 github.com/faustbrian/go-log/v2 v2.0.1/go.mod h1:0qSGpeNUjpigrUjeGM3kGJTB1xW0GYuWsTnakvf5DdM=
 github.com/faustbrian/go-openapi v1.0.0 h1:I78okn/4twfERabfwrMwSwQCt66mPz0FZF+2qz0tUGQ=
