@@ -6,7 +6,7 @@ require (
 	github.com/faustbrian/go-authentication/v2 v2.0.0
 	github.com/faustbrian/go-authorization v1.1.0
 	github.com/faustbrian/go-correlation v1.1.2
-	github.com/faustbrian/go-http-client/v2 v2.0.0
+	github.com/faustbrian/go-http-client/v2 v2.0.1
 	github.com/faustbrian/go-http-middleware/v2 v2.0.0
 	github.com/faustbrian/go-jsonapi/v2 v2.0.0
 	github.com/faustbrian/go-jsonrpc v1.1.1
@@ -17,7 +17,7 @@ require (
 )
 
 require (
-	github.com/faustbrian/go-circuit-breaker v1.0.0 // indirect
+	github.com/faustbrian/go-circuit-breaker v1.0.1 // indirect
 	github.com/faustbrian/go-clock v1.1.0 // indirect
 	github.com/faustbrian/go-identifier/v2 v2.0.0 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
