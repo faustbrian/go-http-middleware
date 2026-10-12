@@ -142,3 +142,12 @@ clean immediately on success/failure; parent owns publication/CI/ledger.
 - Every bounded Go run removed exact owned GOCACHE/GOMODCACHE/GOTMPDIR on exit;
   imported-source probe removed. Parser/render/inventory resources removed after
   capturing this evidence. Parent-owned CLI/scanner are retained; parent owns CI.
+
+## Objective Enforcement
+
+The checksum-pinned public Tools v2.4.0 verifier now supplies
+`make source-docs-check` as a prerequisite of the existing local and CI Make
+routes. Ordinary shared CI selects strict source-documentation checking and
+requires its result. Native prerequisites, operation budgets, security and
+release controls are retained. Hosted exact-head evidence is recorded by the
+coordination ledger; configuration alone does not establish green delivery.
