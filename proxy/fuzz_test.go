@@ -9,6 +9,7 @@ import (
 	"github.com/faustbrian/go-http-middleware/v2/proxy"
 )
 
+// FuzzForwardedField exercises untrusted forwarding text behind a fixed trusted peer; derived host/prefix must remain bounded.
 func FuzzForwardedField(f *testing.F) {
 	f.Add(`for=198.51.100.7;proto=https;host=api.example`)
 	f.Add(`for="[2001:db8::1]:443"`)

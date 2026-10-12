@@ -19,7 +19,9 @@ or CSRF protection. Requested methods are validated as tokens before wildcard
 matching or response-header reflection. An OPTIONS request is classified as a
 preflight only when `Access-Control-Request-Method` is present. Once classified,
 every present preflight control field is validated even when its first value is
-empty, and malformed origins never reach the application handler.
+empty. Malformed preflight origins never reach the application handler; malformed
+or denied ordinary origins still reach downstream without this layer adding
+allow fields. CORS is not a request-execution authorization gate.
 
 ## HSTS and headers
 

@@ -1,4 +1,7 @@
-// Package middlewaretest provides deterministic fixtures for middleware users.
+// Package middlewaretest provides deterministic Trace and writer-interface
+// fixtures for middleware users. They inspect application expectations, not
+// independent HTTP conformance or real transport success; fixture strings may
+// be sensitive, so use synthetic data. No server or callback lifetime is owned.
 package middlewaretest
 
 import (
@@ -7,7 +10,8 @@ import (
 	"sync"
 )
 
-// Trace records bounded chain order under concurrent-safe access.
+// Trace records bounded chain order under synchronized access. NewTrace admits
+// 1024 events; the zero value admits none. Bounds count events, not string bytes.
 type Trace struct {
 	mu      sync.Mutex
 	events  []string
@@ -45,7 +49,13 @@ func (t *Trace) Events() []string {
 }
 
 // Capabilities describes standard optional ResponseWriter interfaces.
-type Capabilities struct{ Flusher, Hijacker, Pusher, ReaderFrom bool }
+type Capabilities struct {
+	// Flusher reports the standard flush interface, not successful transport support.
+	// Hijacker reports the standard takeover interface.
+	// Pusher reports the standard HTTP push interface; operations may still be unsupported.
+	// ReaderFrom reports optimized reader-copy support.
+	Flusher, Hijacker, Pusher, ReaderFrom bool
+}
 
 // CapabilitiesOf inspects only standard optional interfaces.
 func CapabilitiesOf(writer http.ResponseWriter) Capabilities {

@@ -1,4 +1,7 @@
-// Package secureheader applies explicit response security header policy.
+// Package secureheader applies explicit response header policy through New.
+// It checks selected RFC6797/7034 and Referrer Policy tokens/field bounds, not
+// TLS deployment, CSP directives, nonce generation or application assets.
+// Configuration is copied and header policy reasserted through transparent writers.
 package secureheader
 
 import (
@@ -24,23 +27,37 @@ const (
 // Policy is copied during construction. HSTS requires AcknowledgeHSTS because
 // an incorrect deployment can create a long-lived outage.
 type Policy struct {
-	XContentTypeOptions   string
-	ReferrerPolicy        string
-	FrameOptions          string
-	PermissionsPolicy     string
+	// XContentTypeOptions is empty or nosniff, case-insensitively validated.
+	XContentTypeOptions string
+	// ReferrerPolicy is empty or one supported policy token.
+	ReferrerPolicy string
+	// FrameOptions is empty, DENY or SAMEORIGIN.
+	FrameOptions string
+	// PermissionsPolicy is opaque deployment text; only field-value bytes are checked, not directive semantics.
+	PermissionsPolicy string
+	// ContentSecurityPolicy is opaque deployment text; application nonces/assets and directive correctness remain caller-owned.
 	ContentSecurityPolicy string
-	HSTS                  string
-	AcknowledgeHSTS       bool
-	Existing              ExistingPolicy
+	// HSTS admits max-age up to ten years and optional includeSubDomains/preload, not HTTPS deployment verification.
+	HSTS string
+	// AcknowledgeHSTS is required when HSTS is nonempty.
+	AcknowledgeHSTS bool
+	// Existing selects Replace by default or Preserve of nonempty downstream values.
+	Existing ExistingPolicy
 }
 
 // ErrInvalidPolicy identifies invalid security header configuration.
 var ErrInvalidPolicy = errors.New("secureheader: invalid policy")
 
 // ConfigError reports an invalid security header policy field.
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
 
+// Error formats the policy-field diagnostic; constructors use fixed field labels.
 func (e *ConfigError) Error() string { return fmt.Sprintf("secureheader: invalid %s", e.Field) }
+
+// Unwrap exposes ErrInvalidPolicy for errors.Is.
 func (e *ConfigError) Unwrap() error { return ErrInvalidPolicy }
 
 // APIDefaults returns conservative headers that do not assume HTML rendering.
@@ -48,7 +65,11 @@ func APIDefaults() Policy {
 	return Policy{XContentTypeOptions: "nosniff", ReferrerPolicy: "no-referrer", FrameOptions: "DENY"}
 }
 
-// New constructs header middleware.
+// New constructs header middleware, applying nonempty fields at entry and writer
+// operations. Replace reasserts configured values; Preserve uses downstream
+// nonempty values. CSP/Permissions-Policy get only field-value admission, not
+// semantic validation. HSTS acknowledgment is a deployment choice, not proof that
+// HTTPS is working. No response escaping, session, authentication or server is owned.
 func New(policy Policy) (func(http.Handler) http.Handler, error) {
 	if policy.Existing > Preserve {
 		return nil, &ConfigError{Field: "existing policy"}

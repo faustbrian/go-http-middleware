@@ -1,5 +1,8 @@
 // Package content enforces HTTP media-type negotiation without decoding or
-// encoding representations.
+// encoding representations. New installs request/Accept admission under selected
+// RFC9110 field rules, not an automatic encoder, chosen representation or total
+// standards-conformance guarantee. Configured lists are snapshotted; request
+// body/headers remain borrowed and no body read or cancellation worker is owned.
 package content
 
 import (
@@ -16,20 +19,35 @@ import (
 // configured list is bounded by MaxValues and both lists share the
 // MaxHeaderBytes construction budget.
 type Policy struct {
+	// RequestTypes is copied into normalized media ranges; empty disables request admission.
+	// ResponseTypes is a copied supported-range list, not selected response Content-Type. Empty disables Accept admission.
 	RequestTypes, ResponseTypes []string
-	MaxValues, MaxHeaderBytes   int
+	// MaxValues caps each configured list and total Accept items, default 64 and maximum 256.
+	// MaxHeaderBytes caps combined configured-type bytes and selected incoming field bytes, default 8192 and maximum 1 MiB.
+	MaxValues, MaxHeaderBytes int
 }
 
 // ErrInvalidPolicy identifies invalid content negotiation configuration.
 var ErrInvalidPolicy = errors.New("content: invalid policy")
 
 // ConfigError reports an invalid content negotiation policy field.
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
 
+// Error formats the policy-field diagnostic; constructors use fixed field labels.
 func (e *ConfigError) Error() string { return fmt.Sprintf("content: invalid %s", e.Field) }
+
+// Unwrap exposes ErrInvalidPolicy for errors.Is.
 func (e *ConfigError) Unwrap() error { return ErrInvalidPolicy }
 
-// New constructs 415 request and 406 response acceptance guards.
+// New constructs 415 request and 406 Accept-admission guards. Request Content-Type
+// applies when Body is nonnil and ContentLength is nonzero; response admission
+// accepts any positive matching range after validating the entire list. Existing
+// limitation: a broad positive range can override a more-specific q=0 range, and
+// parameters are not used to choose a representation. Downstream still owns the
+// actual response type, encoding, authorization and resource lifecycle.
 func New(policy Policy) (func(http.Handler) http.Handler, error) {
 	if policy.MaxValues == 0 {
 		policy.MaxValues = 64
@@ -105,6 +123,10 @@ func matchesAny(candidate string, supported []string) bool {
 	}
 	return false
 }
+
+// Keep validating after a match so a valid prefix cannot hide malformed or
+// oversized trailing fields. This is positive-range existence, not specificity
+// ranking or response representation selection.
 func acceptable(lines []string, supported []string, maximum, maxBytes int) bool {
 	if len(lines) == 0 {
 		return true

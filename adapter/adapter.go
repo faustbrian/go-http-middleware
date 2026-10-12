@@ -1,5 +1,7 @@
 // Package adapter names middleware owned by sibling packages without
-// reimplementing their policy or state machines.
+// reimplementing their policy or state machines. Start with Named and explicitly
+// validate the concerns the selected service configuration owns. Names alone do
+// not authenticate requests, sign data, enforce authorization or deduplicate work.
 package adapter
 
 import (
@@ -36,11 +38,17 @@ const (
 var ErrDuplicateOwnership = errors.New("adapter: duplicate ownership")
 
 // OwnershipError identifies an overlapping service and chain concern.
-type OwnershipError struct{ Concern Concern }
+type OwnershipError struct {
+	// Concern is the configured overlapping ownership label, not detected behavior.
+	Concern Concern
+}
 
+// Error names the overlapping concern.
 func (e *OwnershipError) Error() string {
 	return fmt.Sprintf("adapter: %s is installed by both service and the explicit chain", e.Concern)
 }
+
+// Unwrap exposes ErrDuplicateOwnership for errors.Is.
 func (e *OwnershipError) Unwrap() error { return ErrDuplicateOwnership }
 
 // Named adapts an owning package's standard middleware into an inspectable
@@ -58,7 +66,8 @@ func Named(concern Concern, item func(http.Handler) http.Handler) (middleware.De
 func GoServiceDefaults() []Concern { return []Concern{Recovery, RequestID, BodyLimit} }
 
 // ValidateGoService rejects an explicit chain that duplicates a concern the
-// selected service configuration owns.
+// selected service configuration owns. This compares declared names only, not
+// installed behavior or service discovery; callers must supply accurate ownership.
 func ValidateGoService(chain middleware.Chain, serviceOwns []Concern) error {
 	owned := make(map[string]Concern, len(serviceOwns))
 	for _, concern := range serviceOwns {

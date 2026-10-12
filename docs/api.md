@@ -33,5 +33,6 @@ to nil remain construction errors when the chain is resolved.
 
 Each subpackage's exported policy documents its defaults and bounds in Go doc.
 Configured proxy prefixes, content types, compression exclusions, deadlines,
-and admission waits are validated against the same resource-budget posture as
-request-controlled fields.
+and admission waits have operation-specific bounds, not one process-wide memory
+or execution-time ceiling. See [existing limits](behavior.md#existing-implementation-limits)
+for deferred chain admission, negotiation and buffered-timeout caveats.

@@ -32,7 +32,9 @@ allowlist before constructing an absolute URL.
 | accepted preflight | `204`, or application response when pass-through is set |
 
 Origins normalize scheme, IDNA host, IPv6 brackets, and default ports. The
-opaque `null` origin is accepted only when explicitly listed. HTTP method
+opaque `null` origin can be admitted by an exact configured entry, an approving
+dynamic callback or non-credentialed wildcard; wildcard is not a null exclusion.
+HTTP method
 tokens are compared case-sensitively; header names are compared
 case-insensitively. CORS is not authentication, authorization, or CSRF
 protection.
@@ -101,3 +103,33 @@ idle, header, connection, and shutdown limits; they do not replace them.
 Observers run synchronously once at completion. They must impose their own
 latency budget. Caller-triggered recursion is supported but remains caller
 bounded; the package creates no observer worker or recursive dispatch.
+
+## Existing implementation limits
+
+These record current limitations, not normative protocol interpretations or
+conformance success. `New`/`Described` enforce the 256-layer admission count;
+`Append`/`Prepend` and `Handler` do not re-admit that count. Use `Described` or
+`Concat` when enforcing the construction ceiling on extended chains.
+
+Compression's initial 406 rejects requests with neither supported coding
+acceptable. After downstream produces an ineligible response (for example below
+the threshold or `no-transform`), the current implementation can emit identity
+even when its negotiated quality was zero. Content admission requires any
+positive matching `Accept` range; a broad positive range can override a more
+specific zero-quality range and parameters do not select a representation.
+Neither guard guarantees the application's actual response representation.
+
+Buffered timeout limits payload and worker count, not header-map size, total
+heap or transport write duration. Timed-out handlers retain a slot until they
+return; late payload writes fail but Header still exposes a mutable map. A late
+worker panic is recovered without a delivered observation. Callers must retain
+cooperative cancellation and ordinary ResponseWriter/header ownership.
+
+The transparent tracking recorder does not mark status 101 alone as committed;
+it needs a payload, flush or successful hijack. This existing tracking omission
+is distinct from compression's explicit 101 commitment and can affect recovery/
+observation metadata for bare upgrades. It is not a net/http interpretation.
+
+Observation bounds caller classifications by bytes, not privacy or cardinality;
+truncation can split UTF-8. Injected clock panics can prevent events. Recovery
+stack capture is bounded but not redacted; application observers own its privacy.

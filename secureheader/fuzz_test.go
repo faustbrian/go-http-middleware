@@ -9,6 +9,7 @@ import (
 	"github.com/faustbrian/go-http-middleware/v2/secureheader"
 )
 
+// FuzzConfiguredHeaderValues admitted opaque security-header configuration must not reflect CR/LF/NUL into response fields.
 func FuzzConfiguredHeaderValues(f *testing.F) {
 	f.Add("camera=()", "default-src 'none'")
 	f.Add("x\r\nInjected: yes", "")

@@ -9,6 +9,7 @@ import (
 	"github.com/faustbrian/go-http-middleware/v2/compress"
 )
 
+// FuzzAcceptEncoding exercises arbitrary coding negotiation for a fixed small payload and bounds fixture output; not conformance proof.
 func FuzzAcceptEncoding(f *testing.F) {
 	f.Add("gzip")
 	f.Add("gzip;q=0, *;q=1")

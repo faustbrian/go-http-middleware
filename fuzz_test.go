@@ -7,6 +7,7 @@ import (
 	middleware "github.com/faustbrian/go-http-middleware/v2"
 )
 
+// FuzzDescriptorNames accepted arbitrary descriptor names must remain resolvable through chain construction; rejection is allowed.
 func FuzzDescriptorNames(f *testing.F) {
 	f.Add("request-id")
 	f.Add("bad name")

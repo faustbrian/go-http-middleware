@@ -9,6 +9,7 @@ import (
 	"github.com/faustbrian/go-http-middleware/v2/requestid"
 )
 
+// ExampleChain demonstrates request-forward and response-reverse order through an explicitly resolved chain.
 func ExampleChain() {
 	outer := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -29,6 +30,7 @@ func ExampleChain() {
 	// Output: request handler response
 }
 
+// Example_requestIdentifier demonstrates deterministic caller generation and a response ID without trusting inbound identity.
 func Example_requestIdentifier() {
 	ids, err := requestid.New(requestid.Policy{Generator: func() (string, error) { return "example-id", nil }})
 	if err != nil {

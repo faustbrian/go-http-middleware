@@ -1,4 +1,7 @@
-// Package observe emits one bounded transport completion event per request.
+// Package observe observes transport completion with New and optional RecordRoute.
+// It owns no logger, exporter or callback worker. Completion calls are synchronous,
+// not delivery acknowledgment; caller clocks/classifiers/observers own privacy,
+// latency, concurrency and lifecycle. Panicking clocks can prevent observation.
 package observe
 
 import (
@@ -28,26 +31,41 @@ const (
 	Panicked Outcome = "panicked"
 )
 
-// Event excludes raw paths, queries, headers, payloads, identities, and errors.
-// Method and Proto use fixed known values plus OTHER.
+// Event does not automatically collect paths, queries, headers, payloads,
+// identities or errors. Caller-supplied Route/ClientClass can nevertheless leak
+// them; byte truncation is neither sanitization nor bounded cardinality. Method
+// and Proto use fixed known values plus OTHER.
 type Event struct {
-	Method      string
-	Route       string
-	Status      int
-	Bytes       int64
-	Duration    time.Duration
-	Proto       string
-	Outcome     Outcome
+	// Method is a known HTTP method or OTHER.
+	Method string
+	// Route is caller-selected metadata truncated to 128 bytes; no privacy/cardinality sanitization is applied.
+	Route string
+	// Status is recorded final status or 200 when absent; informational responses alone do not commit.
+	Status int
+	// Bytes counts successful writer payload bytes, not wire framing or guaranteed delivery.
+	Bytes int64
+	// Duration uses the injected clock and is clamped to zero when negative.
+	Duration time.Duration
+	// Proto is a known HTTP version or OTHER.
+	Proto string
+	// Outcome gives panic precedence over cancellation, then status classification.
+	Outcome Outcome
+	// ClientClass is caller-selected metadata truncated to 64 bytes, potentially splitting UTF-8.
 	ClientClass string
 }
 
 // Policy injects observation without owning a logger or telemetry SDK. Route
 // and ClientClass run once at completion; their panics are contained.
 type Policy struct {
-	Observer        func(context.Context, Event)
-	Route           func(*http.Request) string
-	ClientClass     func(*http.Request) string
-	Now             func() time.Time
+	// Observer is required borrowed synchronous caller code; receives the completion request context, possibly canceled.
+	Observer func(context.Context, Event)
+	// Route is a fallback classification extractor after downstream completion; panic yields empty metadata.
+	Route func(*http.Request) string
+	// ClientClass is a completion classification extractor; panic yields empty metadata.
+	ClientClass func(*http.Request) string
+	// Now defaults to time.Now; borrowed clock panics propagate and can prevent event emission.
+	Now func() time.Time
+	// RepanicObserver lets observer panics propagate, possibly masking an original handler panic; zero contains them.
 	RepanicObserver bool
 }
 
@@ -62,12 +80,22 @@ type routeState struct {
 var ErrInvalidPolicy = errors.New("observe: invalid policy")
 
 // ConfigError reports an invalid observation policy field.
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
 
+// Error formats the policy-field diagnostic; constructors use fixed field labels.
 func (e *ConfigError) Error() string { return fmt.Sprintf("observe: invalid %s", e.Field) }
+
+// Unwrap exposes ErrInvalidPolicy for errors.Is.
 func (e *ConfigError) Unwrap() error { return ErrInvalidPolicy }
 
-// New constructs observation middleware.
+// New attempts synchronous observation after downstream completion, including
+// propagated panic/cancellation. Extractor panics produce empty classifications;
+// observer panics are contained unless RepanicObserver opts out. Clock panics
+// are not contained. Callback implementations are borrowed and may run concurrently
+// across requests; no callback deadline or network/telemetry delivery is provided.
 func New(policy Policy) (func(http.Handler) http.Handler, error) {
 	if policy.Observer == nil {
 		return nil, &ConfigError{Field: "observer"}
@@ -110,7 +138,9 @@ func New(policy Policy) (func(http.Handler) http.Handler, error) {
 
 // RecordRoute stores a bounded route classification for the outer observation
 // layer. Route-local middleware may call it after a router has matched. It
-// returns false when request is nil or observation middleware is absent.
+// returns false when request is nil or observation middleware is absent. Last
+// recorded value wins under the request-scoped lock; truncation is by bytes and
+// can split UTF-8. The route is not validated or sanitized; use trusted labels.
 func RecordRoute(request *http.Request, route string) bool {
 	if request == nil {
 		return false

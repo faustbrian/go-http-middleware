@@ -8,6 +8,7 @@ import (
 	"github.com/faustbrian/go-http-middleware/v2/cors"
 )
 
+// FuzzOriginAndPreflight exercises arbitrary origin/method/header preflight input and the reflected-origin byte bound; not a browser oracle.
 func FuzzOriginAndPreflight(f *testing.F) {
 	f.Add("https://app.example", "POST", "Content-Type")
 	f.Add("null", "BAD METHOD", "X-Test\r\n")

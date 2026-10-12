@@ -1,5 +1,8 @@
 // Package proxy derives effective request information only across explicitly
-// trusted proxy address boundaries. It never mutates the request target.
+// trusted proxy address boundaries. New derives context metadata without
+// mutating the target or connecting to a proxy. RFC7239 syntax and legacy
+// X-Forwarded syntax are separate policy modes; neither authorizes redirects.
+// Deployments must strip attacker forwarding data at their trusted boundary.
 package proxy
 
 import (
@@ -39,19 +42,28 @@ const (
 
 // Info contains independently derived effective values.
 type Info struct {
-	ClientIP   netip.Addr
-	Host       string
-	Scheme     string
-	Prefix     string
+	// ClientIP is the direct peer or trust-walk endpoint; all-trusted chains retain the leftmost supplied hop. Invalid socket metadata can yield an invalid address.
+	ClientIP netip.Addr
+	// Host is direct request Host or the nearest configured forwarding value; not redirect authorization.
+	Host string
+	// Scheme is TLS-derived http/https or the nearest admitted forwarding value.
+	Scheme string
+	// Prefix is an admitted X-Forwarded-Prefix value only; it never rewrites URL.Path.
+	Prefix string
+	// Provenance states whether trusted configured forwarding syntax influenced the result.
 	Provenance Provenance
 }
 
 // Policy is copied during construction. Trusted accepts at most 256 valid
 // prefixes; prefixes are stored in canonical masked form.
 type Policy struct {
-	Trusted        []netip.Prefix
-	Mode           Mode
-	MaxHops        int
+	// Trusted contains at most 256 copied masked peer prefixes; deployment must strip spoofed forwarding fields.
+	Trusted []netip.Prefix
+	// Mode selects Forwarded by default or explicit XForwarded; syntaxes are not combined.
+	Mode Mode
+	// MaxHops defaults to 16 and is bounded to [1,128].
+	MaxHops int
+	// MaxHeaderBytes defaults to 8192, maximum 1 MiB; admission applies per selected field, not all request headers.
 	MaxHeaderBytes int
 }
 
@@ -59,9 +71,15 @@ type Policy struct {
 var ErrInvalidPolicy = errors.New("proxy: invalid policy")
 
 // ConfigError reports an invalid trusted proxy policy field.
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
 
+// Error formats the policy-field diagnostic; constructors use fixed field labels.
 func (e *ConfigError) Error() string { return fmt.Sprintf("proxy: invalid %s", e.Field) }
+
+// Unwrap exposes ErrInvalidPolicy for errors.Is.
 func (e *ConfigError) Unwrap() error { return ErrInvalidPolicy }
 
 type contextKey struct{}
@@ -69,7 +87,11 @@ type contextKey struct{}
 const maximumTrustedPrefixes = 256
 
 // New constructs trusted-proxy middleware. Malformed forwarding fields fail
-// closed to direct connection information.
+// closed to direct connection information, not an HTTP refusal. Context clones
+// share original request fields/body; trust lists are copied. The client walks
+// inward from the peer to the first untrusted hop, or the leftmost supplied hop
+// when all are trusted. Host/scheme use the nearest
+// admitted forwarding metadata and still require caller redirect/authority policy.
 func New(policy Policy) (func(http.Handler) http.Handler, error) {
 	if policy.Mode > XForwarded {
 		return nil, &ConfigError{Field: "mode"}
@@ -270,6 +292,8 @@ func parseNode(value string) (netip.Addr, bool) {
 	return addressPort.Addr().Unmap(), true
 }
 
+// Only traverse the next supplied address while the current outer peer is
+// trusted. Earlier client-controlled hops cannot extend that trust chain.
 func selectClient(peer netip.Addr, hops []netip.Addr, trusted []netip.Prefix) netip.Addr {
 	current := peer
 	for index := len(hops) - 1; index >= 0 && isTrusted(current, trusted); index-- {

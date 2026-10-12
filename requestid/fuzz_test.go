@@ -8,6 +8,7 @@ import (
 	"github.com/faustbrian/go-http-middleware/v2/requestid"
 )
 
+// FuzzInboundIdentifier exercises arbitrary inbound identifier/trust input against fixed generator fallback and the 64-byte output ceiling.
 func FuzzInboundIdentifier(f *testing.F) {
 	f.Add("trusted", true)
 	f.Add("bad\rvalue", true)

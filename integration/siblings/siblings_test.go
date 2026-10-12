@@ -1,3 +1,6 @@
+// Package siblings_test exercises independently published dependency composition.
+// It consumes the pinned root release rather than this worktree source; changing
+// comments does not requalify sibling authentication, routing or service behavior.
 package siblings_test
 
 import (

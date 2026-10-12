@@ -1,4 +1,7 @@
-// Package recovery contains application panics below an explicit boundary.
+// Package recovery contains downstream panics on the serving goroutine below
+// an explicit New boundary, not panics in arbitrary spawned goroutines. It owns
+// no logger or shutdown. Optional stack traces are sensitive caller-owned
+// observations; fixed responses do not expose panic values.
 package recovery
 
 import (
@@ -22,15 +25,21 @@ const (
 
 // Event reports safe panic classification and response ownership state.
 type Event struct {
-	Class     Class
+	// Class is a bounded application/runtime classification, not the panic value.
+	Class Class
+	// Committed records observed writer commitment or successful takeover at recovery.
 	Committed bool
-	Stack     []byte
+	// Stack is an owned optional current-goroutine trace; it may reveal paths and runtime details and is not redacted.
+	Stack []byte
 }
 
 // Policy configures recovery observation. Observer panics are contained.
 type Policy struct {
-	Observer      func(Event)
-	CaptureStack  bool
+	// Observer is borrowed synchronous caller code; panics are contained, latency/concurrent safety are not supplied.
+	Observer func(Event)
+	// CaptureStack opts into a bounded runtime.Stack trace, which requires caller privacy controls.
+	CaptureStack bool
+	// MaxStackBytes defaults to 65536 when capture is enabled; maximum 1 MiB, otherwise must be zero.
 	MaxStackBytes int
 }
 
@@ -43,13 +52,22 @@ const (
 )
 
 // ConfigError reports an invalid recovery policy field.
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
 
+// Error formats the policy-field diagnostic; constructors use fixed field labels.
 func (e *ConfigError) Error() string { return fmt.Sprintf("recovery: invalid %s", e.Field) }
+
+// Unwrap exposes ErrInvalidPolicy for errors.Is.
 func (e *ConfigError) Unwrap() error { return ErrInvalidPolicy }
 
 // New constructs recovery middleware. http.ErrAbortHandler is re-panicked so
-// normal connection abort behavior remains owned by net/http.
+// normal connection abort behavior remains owned by net/http. Other panics notify
+// the borrowed observer synchronously, then emit 500 only while uncommitted.
+// Committed/taken-over output is not rewritten and the original application panic
+// is swallowed. Observer panics are contained, not blocking or privacy leakage.
 func New(policy Policy) (func(http.Handler) http.Handler, error) {
 	if policy.CaptureStack && policy.MaxStackBytes == 0 {
 		policy.MaxStackBytes = defaultMaxStackBytes

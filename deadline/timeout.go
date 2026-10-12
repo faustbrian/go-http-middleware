@@ -24,15 +24,27 @@ var (
 // slot, but cannot write through the closed buffer or create unbounded
 // middleware-owned goroutine growth.
 type TimeoutPolicy struct {
-	Timeout          time.Duration
+	// Timeout is positive and at most 24 hours; parent cancellation can expire earlier.
+	Timeout time.Duration
+	// MaxResponseBytes caps buffered payload in [1,16 MiB], not headers or total heap.
 	MaxResponseBytes int
-	MaxConcurrent    int
-	Status           int
+	// MaxConcurrent bounds running handlers per returned factory; zero defaults to 1024, maximum 65536.
+	MaxConcurrent int
+	// Status is the timeout/capacity response in [500,599]; zero defaults to 503.
+	Status int
 }
 
 // NewTimeout constructs bounded buffered timeout middleware. The wrapped
 // writer intentionally exposes no streaming, hijacking, push, or full-duplex
 // capability because those operations are incompatible with response replay.
+// Each admitted request starts one worker, retaining its slot until the handler
+// returns even after timeout. There is no Close/drain/join; handlers must stop
+// using request resources cooperatively. Timely panics reappear on the serving
+// goroutine; a panic after timeout is recovered in the worker but not reported.
+// MaxResponseBytes bounds payload only. Header() exposes a caller-owned mutable
+// map, not synchronized arbitrary concurrent mutation; late payload writes fail,
+// not header-map writes. Cancellation selects the error path but cannot impose
+// a transport write deadline or preempt blocked informational-header forwarding.
 func NewTimeout(policy TimeoutPolicy) (func(http.Handler) http.Handler, error) {
 	if policy.Status == 0 {
 		policy.Status = http.StatusServiceUnavailable
@@ -61,6 +73,8 @@ func NewTimeout(policy TimeoutPolicy) (func(http.Handler) http.Handler, error) {
 				copyHeaders(w.Header(), header)
 				w.WriteHeader(status)
 			})
+			// One buffered completion lets a timed-out worker release its slot
+			// without depending on the serving goroutine still receiving.
 			completed := make(chan any, 1)
 			go func() {
 				var panicValue any
@@ -116,6 +130,9 @@ func newTimeoutWriter(maximum int, informational ...func(int, http.Header)) *tim
 	}
 	return writer
 }
+
+// Header follows ResponseWriter ownership: one handler coordinates all map
+// access; the payload mutex does not protect mutations through this reference.
 func (w *timeoutWriter) Header() http.Header { return w.header }
 func (w *timeoutWriter) WriteHeader(status int) {
 	w.mu.Lock()

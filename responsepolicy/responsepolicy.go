@@ -1,5 +1,7 @@
 // Package responsepolicy contains declarative cache and transport admission
-// helpers. It does not implement caching or own health handlers.
+// helpers. Start with NoStore or Admission; neither implements a cache, health
+// handler, retry loop or service lifecycle. State callbacks are caller-owned
+// synchronous policy and must be safe for concurrent requests.
 package responsepolicy
 
 import (
@@ -37,8 +39,11 @@ const (
 
 // AdmissionPolicy configures transport-only readiness admission.
 type AdmissionPolicy struct {
-	State      func(context.Context) State
-	Status     int
+	// State is required borrowed synchronous caller code; only Ready proceeds, unknown values reject.
+	State func(context.Context) State
+	// Status is a rejection status in [400,599]; zero defaults to 503.
+	Status int
+	// RetryAfter is empty, seconds up to 86400 or an HTTP date within 128 admitted bytes.
 	RetryAfter string
 }
 
@@ -46,12 +51,21 @@ type AdmissionPolicy struct {
 var ErrInvalidPolicy = errors.New("responsepolicy: invalid policy")
 
 // ConfigError reports an invalid response policy field.
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
 
+// Error formats the policy-field diagnostic; constructors use fixed field labels.
 func (e *ConfigError) Error() string { return fmt.Sprintf("responsepolicy: invalid %s", e.Field) }
+
+// Unwrap exposes ErrInvalidPolicy for errors.Is.
 func (e *ConfigError) Unwrap() error { return ErrInvalidPolicy }
 
-// Admission short-circuits through a caller-owned concurrency-safe state source.
+// Admission calls the borrowed state source once before downstream; only Ready
+// proceeds. Context is passed, not forcibly enforced: blocking/panicking callbacks
+// block/panic on the serving goroutine. Other/unknown states emit the configured
+// fixed refusal; Retry-After is a hint, not retry/idempotency or readiness storage.
 func Admission(policy AdmissionPolicy) (func(http.Handler) http.Handler, error) {
 	if policy.State == nil {
 		return nil, &ConfigError{Field: "state source"}

@@ -1,4 +1,7 @@
 // Package requestid propagates bounded request and correlation identifiers.
+// Start with New and read typed context metadata through FromContext. Policies
+// are copied, generator closures borrowed; concurrent requests require safe
+// generators. No signing, deduplication, server or worker lifecycle is owned.
 // Identifiers are metadata and are never authorization evidence.
 package requestid
 
@@ -38,28 +41,44 @@ const (
 // ErrInvalidPolicy identifies invalid identifier policy configuration.
 var ErrInvalidPolicy = errors.New("requestid: invalid policy")
 
-// ConfigError reports invalid construction input.
 // ConfigError reports an invalid identifier policy field.
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
 
+// Error formats the policy-field diagnostic; constructors use fixed field labels.
 func (e *ConfigError) Error() string { return fmt.Sprintf("requestid: invalid %s", e.Field) }
+
+// Unwrap exposes ErrInvalidPolicy for errors.Is.
 func (e *ConfigError) Unwrap() error { return ErrInvalidPolicy }
 
-// Policy is copied by New and is safe to reuse after construction.
+// Policy values are copied by New; Generator closures remain borrowed and must
+// support concurrent calls when the handler is shared.
 type Policy struct {
-	Kind           Kind
-	Header         string
+	// Kind is Request by default; Correlation and Operation use independent context keys.
+	Kind Kind
+	// Header names the inbound field; defaults to X-Correlation-ID for Correlation, X-Request-ID otherwise.
+	Header string
+	// ResponseHeader defaults to Header and is set before downstream execution.
 	ResponseHeader string
-	TrustInbound   bool
-	Invalid        InvalidPolicy
-	MaxLength      int
-	Generator      func() (string, error)
+	// TrustInbound allows one admitted inbound value; false generates instead of trusting supplied IDs.
+	TrustInbound bool
+	// Invalid chooses replacement or rejection only for supplied trusted invalid values; zero replaces.
+	Invalid InvalidPolicy
+	// MaxLength caps identifier bytes in [1,1024]; zero defaults to 128.
+	MaxLength int
+	// Generator is borrowed synchronous caller code; nil uses crypto/rand.Text. Errors become fixed 500 responses, panics propagate.
+	Generator func() (string, error)
 }
 
 type contextKey struct{ kind Kind }
 
 // New constructs identifier middleware. Defaults are X-Request-ID, 128 bytes,
-// untrusted inbound values, replacement on invalid input, and 128 random bits.
+// untrusted inbound values, replacement on invalid input, and crypto/rand.Text.
+// Valid trusted IDs are reused without deduplication; missing IDs still generate
+// under RejectInvalid. Request context is cloned without rewriting inbound headers;
+// the selected response header is set before downstream can overwrite it.
 // Empty, non-ASCII, surrounding-space, control-character, and oversized
 // values are invalid.
 func New(policy Policy) (func(http.Handler) http.Handler, error) {
@@ -120,7 +139,9 @@ func New(policy Policy) (func(http.Handler) http.Handler, error) {
 	}, nil
 }
 
-// FromContext returns an identifier stored by this package.
+// FromContext returns an identifier under the exact Kind key. Missing/unknown
+// kinds return false; nil context is not accepted and panics. IDs are metadata,
+// not proof of identity, uniqueness, exactly-once work or replay refusal.
 func FromContext(ctx context.Context, kind Kind) (string, bool) {
 	value, ok := ctx.Value(contextKey{kind: kind}).(string)
 	return value, ok

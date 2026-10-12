@@ -16,6 +16,7 @@ import (
 	"github.com/faustbrian/go-http-middleware/v2/requestid"
 )
 
+// BenchmarkBaseAndDeepChains compares resolved 0/16/128-layer passthrough chains; construction is outside timing, recorder allocation inside.
 func BenchmarkBaseAndDeepChains(b *testing.B) {
 	for _, depth := range []int{0, 16, 128} {
 		b.Run(fmt.Sprintf("depth-%d", depth), func(b *testing.B) {
@@ -34,6 +35,7 @@ func BenchmarkBaseAndDeepChains(b *testing.B) {
 	}
 }
 
+// BenchmarkRequestID measures request identifier propagation with deterministic generation; excludes construction, includes recorder work.
 func BenchmarkRequestID(b *testing.B) {
 	item, _ := requestid.New(requestid.Policy{Generator: func() (string, error) { return "generated", nil }})
 	handler := item(http.NotFoundHandler())
@@ -44,6 +46,7 @@ func BenchmarkRequestID(b *testing.B) {
 	}
 }
 
+// BenchmarkProxyParsing measures fixed trusted RFC7239 field derivation; prefix parsing/setup excluded, per-request recorder included.
 func BenchmarkProxyParsing(b *testing.B) {
 	item, _ := proxy.New(proxy.Policy{Trusted: []netip.Prefix{netip.MustParsePrefix("10.0.0.0/8")}, Mode: proxy.Forwarded})
 	handler := item(http.NotFoundHandler())
@@ -56,6 +59,7 @@ func BenchmarkProxyParsing(b *testing.B) {
 	}
 }
 
+// BenchmarkCORSPreflight measures one allowed fixed preflight; normalized policy setup excluded, per-request recorder included.
 func BenchmarkCORSPreflight(b *testing.B) {
 	item, _ := cors.New(cors.Policy{AllowedOrigins: []string{"https://app.example"}, AllowedMethods: []string{"POST"}, AllowedHeaders: []string{"Content-Type"}})
 	handler := item(http.NotFoundHandler())
@@ -69,6 +73,7 @@ func BenchmarkCORSPreflight(b *testing.B) {
 	}
 }
 
+// BenchmarkCompression measures one fixed small gzip-only response including compressor and recorder allocation, excluding construction.
 func BenchmarkCompression(b *testing.B) {
 	item, _ := compressmw.New(compressmw.Policy{MinimumBytes: 1})
 	handler := item(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
@@ -82,6 +87,7 @@ func BenchmarkCompression(b *testing.B) {
 	}
 }
 
+// BenchmarkAdmissionContention measures parallel calls under eight shared slots with immediate refusal; throughput mixes accepted and refused requests.
 func BenchmarkAdmissionContention(b *testing.B) {
 	item, _ := admission.New(admission.Policy{MaxInFlight: 8})
 	handler := item(http.NotFoundHandler())

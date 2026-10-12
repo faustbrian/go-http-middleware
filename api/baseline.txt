@@ -2,13 +2,19 @@ package middleware // import "github.com/faustbrian/go-http-middleware/v2"
 
 Package middleware composes explicit net/http middleware without a registry.
 
-Middleware are listed in request execution order. Responses unwind through that
-list in reverse order.
+Start with New or Described, then resolve Handler around the terminal. Layers
+are listed in request execution order and response calls unwind in reverse.
+Construction snapshots metadata, not decorator/handler closures; those remain
+caller-owned. It owns no server, router, authentication, signing, retry,
+replay ledger or shutdown. Callback cancellation is cooperative through request
+context.
 
 CONSTANTS
 
 const MaxChainDepth = 256
-    MaxChainDepth bounds composition work and nested handler depth.
+    MaxChainDepth is the New/Described input-count ceiling. Append/Prepend and
+    Handler do not re-admit that count; it is not a universal serving-depth
+    bound.
 
 
 VARIABLES
@@ -38,13 +44,18 @@ type Chain struct {
     Chain is an immutable ordered sequence of middleware descriptors.
 
 func Described(descriptors ...Descriptor) (Chain, error)
-    Described constructs a chain and rejects duplicate non-empty names.
+    Described snapshots descriptors and validates count, nil layers, names
+    and ordering. Repeated nonempty names require every occurrence to permit
+    duplicates; absent ordering targets impose no constraint and layers are
+    never reordered.
 
 func New(middleware ...Middleware) (Chain, error)
     New constructs a chain from unnamed middleware.
 
 func (c Chain) Append(descriptor Descriptor) Chain
-    Append returns a new chain with descriptor last.
+    Append returns a metadata copy with descriptor last, without
+    validation/count admission. Use Described/Concat when the New/Described
+    count ceiling is required.
 
 func (c Chain) Concat(suffix Chain) (Chain, error)
     Concat returns a validated chain containing c followed by suffix.
@@ -53,21 +64,34 @@ func (c Chain) Descriptors() []Descriptor
     Descriptors returns an independent snapshot in request execution order.
 
 func (c Chain) Handler(terminal http.Handler) (http.Handler, error)
-    Handler resolves the chain around terminal without changing the chain.
+    Handler validates descriptors and resolves decorators from last to first.
+    Nil terminal/results return ConstructionError; decorator panics propagate.
+    Resolution effects are not rolled back on failure. The zero chain returns
+    the terminal. Existing limitation: appended/prepended depth is not rechecked
+    here. Callers own terminal/decorator lifetimes and concurrent invocation
+    safety.
 
 func (c Chain) Prepend(descriptor Descriptor) Chain
     Prepend returns a new chain with descriptor first. Invalid input is retained
-    for validation by Concat or Handler construction through Described.
+    for descriptor validation by Concat or Handler. No count admission is done
+    here; use Described/Concat to enforce MaxChainDepth before resolving an
+    extended chain.
 
 type ConstructionError struct {
-	Op    string
+	// Op identifies the failing construction stage.
+	Op string
+	// Index is the offending layer index; -1 denotes a non-indexed failure.
 	Index int
-	Name  string
-	Err   error
+	// Name is caller-supplied configuration and can be echoed even when invalid.
+	Name string
+	// Err is the wrapped cause for errors.Is/errors.As.
+	Err error
 }
     ConstructionError reports invalid explicit chain configuration.
 
 func (e *ConstructionError) Error() string
+    Error formats construction metadata and its cause; caller names are not
+    redacted.
 
 func (e *ConstructionError) Unwrap() error
     Unwrap supports errors.Is and errors.As.
@@ -90,24 +114,36 @@ func (d Descriptor) Name() string
     Name returns the stable introspection name.
 
 type DescriptorConfig struct {
-	Name           string
-	Middleware     Middleware
+	// Name is a nonempty label of at most 128 bytes, not a sanitized logging value.
+	Name string
+	// Middleware is a borrowed decorator invoked during Handler resolution.
+	Middleware Middleware
+	// AllowDuplicate must be true on every repeated occurrence of Name.
 	AllowDuplicate bool
-	Before         []string
-	After          []string
+	// Before requires this layer before the first occurrence of each present name; copied.
+	Before []string
+	// After requires this layer after the last occurrence of each present name; copied.
+	After []string
 }
     DescriptorConfig declares immutable inspection and ordering metadata.
 
 type DescriptorInfo struct {
-	Name           string
+	// Name is the inspection label, empty for unnamed layers.
+	Name string
+	// AllowDuplicate records explicit duplicate permission.
 	AllowDuplicate bool
-	Before         []string
-	After          []string
+	// Before is an independent snapshot of before constraints.
+	Before []string
+	// After is an independent snapshot of after constraints.
+	After []string
 }
     DescriptorInfo is an independent introspection snapshot.
 
 type Middleware func(http.Handler) http.Handler
-    Middleware is the standard net/http handler decorator contract.
+    Middleware decorates a borrowed net/http Handler at resolution time.
+    Caller decorators own callback safety, returned handler state and nil/panic
+    behavior; immutable chain metadata does not make those implementations
+    concurrency-safe.
 
 func When(predicate Predicate, middleware Middleware) (Middleware, error)
     When constructs middleware that evaluates predicate once per request. The
@@ -122,7 +158,9 @@ type Predicate func(*http.Request) bool
 package adapter // import "github.com/faustbrian/go-http-middleware/v2/adapter"
 
 Package adapter names middleware owned by sibling packages without
-reimplementing their policy or state machines.
+reimplementing their policy or state machines. Start with Named and explicitly
+validate the concerns the selected service configuration owns. Names alone do
+not authenticate requests, sign data, enforce authorization or deduplicate work.
 
 VARIABLES
 
@@ -138,7 +176,9 @@ func Named(concern Concern, item func(http.Handler) http.Handler) (middleware.De
 
 func ValidateGoService(chain middleware.Chain, serviceOwns []Concern) error
     ValidateGoService rejects an explicit chain that duplicates a concern the
-    selected service configuration owns.
+    selected service configuration owns. This compares declared names only,
+    not installed behavior or service discovery; callers must supply accurate
+    ownership.
 
 
 TYPES
@@ -169,17 +209,24 @@ func GoServiceDefaults() []Concern
     service default server stack. Callers must validate before combining it with
     an explicit chain.
 
-type OwnershipError struct{ Concern Concern }
+type OwnershipError struct {
+	// Concern is the configured overlapping ownership label, not detected behavior.
+	Concern Concern
+}
     OwnershipError identifies an overlapping service and chain concern.
 
 func (e *OwnershipError) Error() string
+    Error names the overlapping concern.
 
 func (e *OwnershipError) Unwrap() error
+    Unwrap exposes ErrDuplicateOwnership for errors.Is.
 
 package admission // import "github.com/faustbrian/go-http-middleware/v2/admission"
 
 Package admission bounds local in-flight requests without implementing a
-distributed rate algorithm.
+distributed rate algorithm. New returns a factory whose uses share semaphore
+state. The caller owns the shutdown signal; middleware owns bounded wait timers
+and permit release, not active-handler cancellation, draining or server closure.
 
 VARIABLES
 
@@ -191,31 +238,50 @@ FUNCTIONS
 
 func New(policy Policy) (func(http.Handler) http.Handler, error)
     New constructs semaphore admission. Channel wait order is not a contractual
-    fairness guarantee; queues are strictly bounded and allocate no waiter
-    goroutine.
+    fairness guarantee; queues are bounded and allocate no waiter goroutine.
+    Saturation or shutdown emits 503, canceled admission 408. Acquired permits
+    survive until downstream return/panic; shutdown does not revoke them
+    or join active handlers. A queued acquisition rechecks cancellation,
+    but shutdown/acquisition arbitration is not a guarantee that no handler can
+    start concurrently with signal closure.
 
 
 TYPES
 
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
     ConfigError reports an invalid admission policy field.
 
 func (e *ConfigError) Error() string
+    Error formats the policy-field diagnostic; constructors use fixed field
+    labels.
 
 func (e *ConfigError) Unwrap() error
+    Unwrap exposes ErrInvalidPolicy for errors.Is.
 
 type Policy struct {
+	// MaxInFlight is required in [1,1000000]; capacity is shared by the returned factory.
+	// MaxWaiters bounds queued callers in [0,1000000]; zero disables waiting.
 	MaxInFlight, MaxWaiters int
-	Wait                    time.Duration
-	RetryAfterSeconds       int
-	Shutdown                <-chan struct{}
+	// Wait bounds queue residence up to one minute, not handler time; zero refuses saturation.
+	Wait time.Duration
+	// RetryAfterSeconds is a nonnegative refusal hint; zero omits the header.
+	RetryAfterSeconds int
+	// Shutdown is caller-owned; close to persistently refuse/wake waiters. It does not cancel or join admitted handlers.
+	Shutdown <-chan struct{}
 }
     Policy configures bounded local request admission. Wait is capped at one
     minute.
 
 package bodylimit // import "github.com/faustbrian/go-http-middleware/v2/bodylimit"
 
-Package bodylimit applies a byte limit before application decoding.
+Package bodylimit applies an encoded-byte read limit before application
+decoding. Install New before any body reader; previously consumed bytes cannot
+be counted. It mutates the request Body/Close fields and delegates body closure
+to the server/caller. It owns no decompression, multipart parser or read
+deadline.
 
 VARIABLES
 
@@ -226,20 +292,33 @@ var ErrInvalidPolicy = errors.New("bodylimit: invalid policy")
 FUNCTIONS
 
 func New(policy Policy) (func(http.Handler) http.Handler, error)
-    New constructs body limiting middleware. Streaming overflow is reported to
-    the application as *http.MaxBytesError. The server retains close ownership.
+    New constructs body limiting middleware. Streaming overflow is reported
+    to the application as *http.MaxBytesError. Overflow marks connection
+    close and emits safe 413 only if no final response was observed. Already
+    committed output cannot be replaced. The original body is borrowed and
+    closure delegates to it; reads depend on caller context/transport deadlines,
+    not forced cancellation.
 
 
 TYPES
 
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
     ConfigError reports an invalid request body limit policy field.
 
 func (e *ConfigError) Error() string
+    Error formats the policy-field diagnostic; constructors use fixed field
+    labels.
 
 func (e *ConfigError) Unwrap() error
+    Unwrap exposes ErrInvalidPolicy for errors.Is.
 
-type Policy struct{ MaxBytes int64 }
+type Policy struct {
+	// MaxBytes is a required positive encoded-byte ceiling on the body visible at installation.
+	MaxBytes int64
+}
     Policy limits encoded transport bytes. It does not decompress or parse a
     body.
 
@@ -247,6 +326,10 @@ package compress // import "github.com/faustbrian/go-http-middleware/v2/compress
 
 Package compress performs bounded gzip content-coding negotiation. Sensitive
 dynamic responses should opt out by setting Cache-Control: no-transform.
+New uses selected RFC9110/9111 field policies, not decompression or message
+signing. It buffers payload then may stream; header/trailer storage and total
+heap/time are not capped by MaxBuffer. Buffered writers withhold optional
+streaming/takeover interfaces; downstream owns request and callback lifetimes.
 
 VARIABLES
 
@@ -259,22 +342,39 @@ FUNCTIONS
 func New(policy Policy) (func(http.Handler) http.Handler, error)
     New constructs gzip middleware. Responses are buffered up to MaxBuffer so
     eligibility can be decided before commitment. Larger eligible responses
-    continue as gzip streams; other responses spill as identity.
+    continue as gzip streams; other responses spill as identity. Existing wire
+    limitation: an ineligible response can use identity even when negotiation
+    gave identity q=0. The initial 406 only covers no acceptable supported
+    coding. Final buffered copy/encoder-close errors cannot be returned by
+    ServeHTTP and are discarded; payload bytes are not guaranteed transport
+    delivery. Panics propagate after closing an active encoder, without
+    middleware cancellation.
 
 
 TYPES
 
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
     ConfigError reports an invalid compression policy field.
 
 func (e *ConfigError) Error() string
+    Error formats the policy-field diagnostic; constructors use fixed field
+    labels.
 
 func (e *ConfigError) Unwrap() error
+    Unwrap exposes ErrInvalidPolicy for errors.Is.
 
 type Policy struct {
+	// MinimumBytes is the minimum payload for gzip eligibility; zero defaults to 1024.
+	// MaxBuffer bounds pending payload before spill, at least MinimumBytes and at most 16 MiB; zero defaults to 1 MiB.
 	MinimumBytes, MaxBuffer int
-	Level, MaxHeaderBytes   int
-	ExcludedTypes           []string
+	// Level is a gzip level; zero selects DefaultCompression rather than NoCompression.
+	// MaxHeaderBytes caps summed Accept-Encoding bytes, default 8192 and maximum 1 MiB; at most 64 items.
+	Level, MaxHeaderBytes int
+	// ExcludedTypes snapshots at most 64 exact media types, each at most 256 bytes; parameters are discarded.
+	ExcludedTypes []string
 }
     Policy configures bounded gzip response compression. ExcludedTypes accepts
     at most 64 exact media types of at most 256 bytes each.
@@ -282,7 +382,10 @@ type Policy struct {
 package content // import "github.com/faustbrian/go-http-middleware/v2/content"
 
 Package content enforces HTTP media-type negotiation without decoding or
-encoding representations.
+encoding representations. New installs request/Accept admission under selected
+RFC9110 field rules, not an automatic encoder, chosen representation or total
+standards-conformance guarantee. Configured lists are snapshotted; request
+body/headers remain borrowed and no body read or cancellation worker is owned.
 
 VARIABLES
 
@@ -293,21 +396,37 @@ var ErrInvalidPolicy = errors.New("content: invalid policy")
 FUNCTIONS
 
 func New(policy Policy) (func(http.Handler) http.Handler, error)
-    New constructs 415 request and 406 response acceptance guards.
+    New constructs 415 request and 406 Accept-admission guards. Request
+    Content-Type applies when Body is nonnil and ContentLength is nonzero;
+    response admission accepts any positive matching range after validating
+    the entire list. Existing limitation: a broad positive range can override
+    a more-specific q=0 range, and parameters are not used to choose a
+    representation. Downstream still owns the actual response type, encoding,
+    authorization and resource lifecycle.
 
 
 TYPES
 
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
     ConfigError reports an invalid content negotiation policy field.
 
 func (e *ConfigError) Error() string
+    Error formats the policy-field diagnostic; constructors use fixed field
+    labels.
 
 func (e *ConfigError) Unwrap() error
+    Unwrap exposes ErrInvalidPolicy for errors.Is.
 
 type Policy struct {
+	// RequestTypes is copied into normalized media ranges; empty disables request admission.
+	// ResponseTypes is a copied supported-range list, not selected response Content-Type. Empty disables Accept admission.
 	RequestTypes, ResponseTypes []string
-	MaxValues, MaxHeaderBytes   int
+	// MaxValues caps each configured list and total Accept items, default 64 and maximum 256.
+	// MaxHeaderBytes caps combined configured-type bytes and selected incoming field bytes, default 8192 and maximum 1 MiB.
+	MaxValues, MaxHeaderBytes int
 }
     Policy configures request and response media-type requirements.
     Each configured list is bounded by MaxValues and both lists share the
@@ -315,8 +434,11 @@ type Policy struct {
 
 package cors // import "github.com/faustbrian/go-http-middleware/v2/cors"
 
-Package cors implements the server-facing portion of the Fetch CORS protocol.
-CORS is neither authentication nor CSRF protection.
+Package cors implements the server-facing portion of the Fetch CORS protocol
+under the repository-pinned Fetch authority, not a full browser implementation.
+Start with New; configured lists are copied, dynamic origin callbacks borrowed.
+CORS controls browser visibility, not authentication, request execution or CSRF
+protection; ordinary denied origins still reach next.
 
 VARIABLES
 
@@ -327,38 +449,62 @@ var ErrInvalidPolicy = errors.New("cors: invalid policy")
 FUNCTIONS
 
 func New(policy Policy) (func(http.Handler) http.Handler, error)
-    New validates wildcard and credential combinations and constructs
-    middleware.
+    New canonicalizes configured origins and validates wildcard/credential
+    policy. Malformed/denied preflights short circuit; ordinary requests with
+    those origins continue without granting CORS access. Wildcard also admits
+    opaque null origin; without wildcard, an exact entry or approving dynamic
+    callback can admit null. Dynamic callback errors deny and panics propagate;
+    callbacks run synchronously with advisory context, without imposed latency
+    or concurrency safety. No request body is read.
 
 
 TYPES
 
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
     ConfigError reports an invalid CORS policy field.
 
 func (e *ConfigError) Error() string
+    Error formats the policy-field diagnostic; constructors use fixed field
+    labels.
 
 func (e *ConfigError) Unwrap() error
+    Unwrap exposes ErrInvalidPolicy for errors.Is.
 
 type Policy struct {
-	AllowedOrigins      []string
-	AllowOrigin         func(context.Context, string) (bool, error)
-	AllowedMethods      []string
-	AllowedHeaders      []string
-	ExposedHeaders      []string
-	AllowCredentials    bool
+	// AllowedOrigins is copied into canonical http/https/null origins or wildcard; empty denies unless AllowOrigin admits.
+	AllowedOrigins []string
+	// AllowOrigin is borrowed synchronous caller policy for unmatched origins; errors deny, panics propagate, context is advisory.
+	AllowOrigin func(context.Context, string) (bool, error)
+	// AllowedMethods is copied, case-sensitive; empty defaults to GET/HEAD. Credentialed wildcard is rejected.
+	AllowedMethods []string
+	// AllowedHeaders is copied, case-insensitive; credentialed wildcard is rejected.
+	AllowedHeaders []string
+	// ExposedHeaders is copied and emitted in configured order; credentialed wildcard is rejected.
+	ExposedHeaders []string
+	// AllowCredentials emits true and prohibits configured wildcards; it does not authenticate requests.
+	AllowCredentials bool
+	// AllowPrivateNetwork opts into the private-network preflight extension, not general Fetch conformance.
 	AllowPrivateNetwork bool
-	MaxAgeSeconds       int
-	PassPreflight       bool
-	MaxHeaderValues     int
-	MaxHeaderBytes      int
+	// MaxAgeSeconds is in [0,86400]; zero omits the header.
+	MaxAgeSeconds int
+	// PassPreflight forwards accepted preflights instead of ending with 204.
+	PassPreflight bool
+	// MaxHeaderValues defaults to 64, maximum 256; caps each configured list and selected preflight items.
+	MaxHeaderValues int
+	// MaxHeaderBytes defaults to 8192, maximum 1 MiB; caps relevant incoming CORS field bytes, not all headers.
+	MaxHeaderBytes int
 }
     Policy is normalized and copied during construction.
 
 package deadline // import "github.com/faustbrian/go-http-middleware/v2/deadline"
 
-Package deadline gives request contexts a bounded handler deadline. It does not
-replace server read, write, idle, upstream, shutdown, or process limits.
+Package deadline offers synchronous context deadlines with New and bounded
+non-streaming response timeouts with NewTimeout. Only the latter starts handler
+workers; timed-out workers retain capacity until cooperative return. Neither
+owns server read/write/idle, upstream, shutdown or process limits.
 
 VARIABLES
 
@@ -375,32 +521,58 @@ var ErrInvalidPolicy = errors.New("deadline: invalid policy")
 FUNCTIONS
 
 func New(policy Policy) (func(http.Handler) http.Handler, error)
-    New constructs deadline middleware. A shorter parent deadline is preserved.
+    New constructs synchronous context-deadline middleware. A shorter parent
+    deadline is preserved; cancellation is deferred until downstream returns.
+    The request clone shares Body and Header with its parent. No timeout
+    response, goroutine, writer buffer or forced interruption is introduced;
+    panics propagate.
 
 func NewTimeout(policy TimeoutPolicy) (func(http.Handler) http.Handler, error)
     NewTimeout constructs bounded buffered timeout middleware. The wrapped
     writer intentionally exposes no streaming, hijacking, push, or full-duplex
     capability because those operations are incompatible with response replay.
+    Each admitted request starts one worker, retaining its slot until the
+    handler returns even after timeout. There is no Close/drain/join; handlers
+    must stop using request resources cooperatively. Timely panics reappear on
+    the serving goroutine; a panic after timeout is recovered in the worker
+    but not reported. MaxResponseBytes bounds payload only. Header() exposes a
+    caller-owned mutable map, not synchronized arbitrary concurrent mutation;
+    late payload writes fail, not header-map writes. Cancellation selects the
+    error path but cannot impose a transport write deadline or preempt blocked
+    informational-header forwarding.
 
 
 TYPES
 
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
     ConfigError reports an invalid deadline policy field.
 
 func (e *ConfigError) Error() string
+    Error formats the policy-field diagnostic; constructors use fixed field
+    labels.
 
 func (e *ConfigError) Unwrap() error
+    Unwrap exposes ErrInvalidPolicy for errors.Is.
 
-type Policy struct{ Timeout time.Duration }
+type Policy struct {
+	// Timeout must be positive and at most 24 hours; it only signals the request context.
+	Timeout time.Duration
+}
     Policy configures a handler context timeout of at most 24 hours. Code that
     ignores its context is not interrupted.
 
 type TimeoutPolicy struct {
-	Timeout          time.Duration
+	// Timeout is positive and at most 24 hours; parent cancellation can expire earlier.
+	Timeout time.Duration
+	// MaxResponseBytes caps buffered payload in [1,16 MiB], not headers or total heap.
 	MaxResponseBytes int
-	MaxConcurrent    int
-	Status           int
+	// MaxConcurrent bounds running handlers per returned factory; zero defaults to 1024, maximum 65536.
+	MaxConcurrent int
+	// Status is the timeout/capacity response in [500,599]; zero defaults to 503.
+	Status int
 }
     TimeoutPolicy configures a bounded non-streaming handler timeout of at
     most 24 hours. MaxConcurrent defaults to 1024 and is capped at 65,536.
@@ -410,7 +582,11 @@ type TimeoutPolicy struct {
 
 package httpx // import "github.com/faustbrian/go-http-middleware/v2/internal/httpx"
 
-Package httpx contains bounded response mechanics shared by middleware.
+Package httpx contains private response/field mechanics shared by middleware.
+Track and WithPolicy retain the pinned httpsnoop optional-interface set;
+recorder/header state follows net/http writer ownership, not arbitrary
+concurrent access. Helpers own no connection lifecycle, security policy or
+wire-delivery proof.
 
 FUNCTIONS
 
@@ -425,7 +601,9 @@ func ParseQuality(value string) (float64, bool)
     ParseQuality parses the RFC 9110 qvalue grammar with at most three decimals.
 
 func SafeError(w http.ResponseWriter, status int, body string)
-    SafeError emits a deterministic text response without internal details.
+    SafeError writes caller-supplied trusted text with no-store/nosniff headers.
+    It does not redact or bound body; package callers supply fixed responses.
+    Final write errors are discarded, not transport-delivery acknowledgment.
 
 func SplitDelimited(value string, delimiter byte, maxBytes, maxItems int) ([]string, bool)
     SplitDelimited splits a bounded HTTP field while respecting quoted strings.
@@ -441,22 +619,39 @@ func WithPolicy(writer http.ResponseWriter, apply func(http.Header)) http.Respon
 TYPES
 
 type Recorder struct {
-	Status    int
-	Bytes     int64
+	// Status is the first tracked non-1xx status or implicit 200; zero can remain after takeover.
+	Status int
+	// Bytes counts successful payload writes/ReadFrom results, not wire framing.
+	Bytes int64
+	// Committed is true after final status, payload, flush or successful hijack; recorder access is not synchronized.
 	Committed bool
 }
     Recorder tracks final status and payload bytes.
 
 func Track(writer http.ResponseWriter) (http.ResponseWriter, *Recorder)
-    Track returns a writer with exactly the optional interfaces of writer.
+    Track returns a borrowed-writer wrapper with exactly its httpsnoop-supported
+    optional interfaces and a mutable unsynchronized per-response recorder.
+    Final status >=200/write/flush or successful hijack commits; 1xx alone does
+    not, including existing 101 tracking omission without write/flush/hijack.
+    Counts reflect successful write results, not framing or delivery
+    acknowledgment.
 
 package middlewaretest // import "github.com/faustbrian/go-http-middleware/v2/middlewaretest"
 
-Package middlewaretest provides deterministic fixtures for middleware users.
+Package middlewaretest provides deterministic Trace and writer-interface
+fixtures for middleware users. They inspect application expectations, not
+independent HTTP conformance or real transport success; fixture strings may be
+sensitive, so use synthetic data. No server or callback lifetime is owned.
 
 TYPES
 
-type Capabilities struct{ Flusher, Hijacker, Pusher, ReaderFrom bool }
+type Capabilities struct {
+	// Flusher reports the standard flush interface, not successful transport support.
+	// Hijacker reports the standard takeover interface.
+	// Pusher reports the standard HTTP push interface; operations may still be unsupported.
+	// ReaderFrom reports optimized reader-copy support.
+	Flusher, Hijacker, Pusher, ReaderFrom bool
+}
     Capabilities describes standard optional ResponseWriter interfaces.
 
 func CapabilitiesOf(writer http.ResponseWriter) Capabilities
@@ -465,7 +660,9 @@ func CapabilitiesOf(writer http.ResponseWriter) Capabilities
 type Trace struct {
 	// Has unexported fields.
 }
-    Trace records bounded chain order under concurrent-safe access.
+    Trace records bounded chain order under synchronized access. NewTrace admits
+    1024 events; the zero value admits none. Bounds count events, not string
+    bytes.
 
 func NewTrace() *Trace
     NewTrace creates a trace bounded to 1024 events.
@@ -481,7 +678,11 @@ func (t *Trace) Record(event string)
 
 package observe // import "github.com/faustbrian/go-http-middleware/v2/observe"
 
-Package observe emits one bounded transport completion event per request.
+Package observe observes transport completion with New and optional RecordRoute.
+It owns no logger, exporter or callback worker. Completion calls are
+synchronous, not delivery acknowledgment; caller clocks/classifiers/observers
+own privacy, latency, concurrency and lifecycle. Panicking clocks can prevent
+observation.
 
 VARIABLES
 
@@ -492,35 +693,59 @@ var ErrInvalidPolicy = errors.New("observe: invalid policy")
 FUNCTIONS
 
 func New(policy Policy) (func(http.Handler) http.Handler, error)
-    New constructs observation middleware.
+    New attempts synchronous observation after downstream completion,
+    including propagated panic/cancellation. Extractor panics produce empty
+    classifications; observer panics are contained unless RepanicObserver
+    opts out. Clock panics are not contained. Callback implementations are
+    borrowed and may run concurrently across requests; no callback deadline or
+    network/telemetry delivery is provided.
 
 func RecordRoute(request *http.Request, route string) bool
     RecordRoute stores a bounded route classification for the outer observation
     layer. Route-local middleware may call it after a router has matched.
     It returns false when request is nil or observation middleware is absent.
+    Last recorded value wins under the request-scoped lock; truncation is
+    by bytes and can split UTF-8. The route is not validated or sanitized;
+    use trusted labels.
 
 
 TYPES
 
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
     ConfigError reports an invalid observation policy field.
 
 func (e *ConfigError) Error() string
+    Error formats the policy-field diagnostic; constructors use fixed field
+    labels.
 
 func (e *ConfigError) Unwrap() error
+    Unwrap exposes ErrInvalidPolicy for errors.Is.
 
 type Event struct {
-	Method      string
-	Route       string
-	Status      int
-	Bytes       int64
-	Duration    time.Duration
-	Proto       string
-	Outcome     Outcome
+	// Method is a known HTTP method or OTHER.
+	Method string
+	// Route is caller-selected metadata truncated to 128 bytes; no privacy/cardinality sanitization is applied.
+	Route string
+	// Status is recorded final status or 200 when absent; informational responses alone do not commit.
+	Status int
+	// Bytes counts successful writer payload bytes, not wire framing or guaranteed delivery.
+	Bytes int64
+	// Duration uses the injected clock and is clamped to zero when negative.
+	Duration time.Duration
+	// Proto is a known HTTP version or OTHER.
+	Proto string
+	// Outcome gives panic precedence over cancellation, then status classification.
+	Outcome Outcome
+	// ClientClass is caller-selected metadata truncated to 64 bytes, potentially splitting UTF-8.
 	ClientClass string
 }
-    Event excludes raw paths, queries, headers, payloads, identities, and
-    errors. Method and Proto use fixed known values plus OTHER.
+    Event does not automatically collect paths, queries, headers, payloads,
+    identities or errors. Caller-supplied Route/ClientClass can nevertheless
+    leak them; byte truncation is neither sanitization nor bounded cardinality.
+    Method and Proto use fixed known values plus OTHER.
 
 type Outcome string
     Outcome is a bounded completion classification.
@@ -538,10 +763,15 @@ const (
 	Panicked Outcome = "panicked"
 )
 type Policy struct {
-	Observer        func(context.Context, Event)
-	Route           func(*http.Request) string
-	ClientClass     func(*http.Request) string
-	Now             func() time.Time
+	// Observer is required borrowed synchronous caller code; receives the completion request context, possibly canceled.
+	Observer func(context.Context, Event)
+	// Route is a fallback classification extractor after downstream completion; panic yields empty metadata.
+	Route func(*http.Request) string
+	// ClientClass is a completion classification extractor; panic yields empty metadata.
+	ClientClass func(*http.Request) string
+	// Now defaults to time.Now; borrowed clock panics propagate and can prevent event emission.
+	Now func() time.Time
+	// RepanicObserver lets observer panics propagate, possibly masking an original handler panic; zero contains them.
 	RepanicObserver bool
 }
     Policy injects observation without owning a logger or telemetry SDK.
@@ -550,7 +780,10 @@ type Policy struct {
 package proxy // import "github.com/faustbrian/go-http-middleware/v2/proxy"
 
 Package proxy derives effective request information only across explicitly
-trusted proxy address boundaries. It never mutates the request target.
+trusted proxy address boundaries. New derives context metadata without mutating
+the target or connecting to a proxy. RFC7239 syntax and legacy X-Forwarded
+syntax are separate policy modes; neither authorizes redirects. Deployments must
+strip attacker forwarding data at their trusted boundary.
 
 VARIABLES
 
@@ -562,23 +795,38 @@ FUNCTIONS
 
 func New(policy Policy) (func(http.Handler) http.Handler, error)
     New constructs trusted-proxy middleware. Malformed forwarding fields fail
-    closed to direct connection information.
+    closed to direct connection information, not an HTTP refusal. Context clones
+    share original request fields/body; trust lists are copied. The client walks
+    inward from the peer to the first untrusted hop, or the leftmost supplied
+    hop when all are trusted. Host/scheme use the nearest admitted forwarding
+    metadata and still require caller redirect/authority policy.
 
 
 TYPES
 
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
     ConfigError reports an invalid trusted proxy policy field.
 
 func (e *ConfigError) Error() string
+    Error formats the policy-field diagnostic; constructors use fixed field
+    labels.
 
 func (e *ConfigError) Unwrap() error
+    Unwrap exposes ErrInvalidPolicy for errors.Is.
 
 type Info struct {
-	ClientIP   netip.Addr
-	Host       string
-	Scheme     string
-	Prefix     string
+	// ClientIP is the direct peer or trust-walk endpoint; all-trusted chains retain the leftmost supplied hop. Invalid socket metadata can yield an invalid address.
+	ClientIP netip.Addr
+	// Host is direct request Host or the nearest configured forwarding value; not redirect authorization.
+	Host string
+	// Scheme is TLS-derived http/https or the nearest admitted forwarding value.
+	Scheme string
+	// Prefix is an admitted X-Forwarded-Prefix value only; it never rewrites URL.Path.
+	Prefix string
+	// Provenance states whether trusted configured forwarding syntax influenced the result.
 	Provenance Provenance
 }
     Info contains independently derived effective values.
@@ -597,9 +845,13 @@ const (
 	XForwarded
 )
 type Policy struct {
-	Trusted        []netip.Prefix
-	Mode           Mode
-	MaxHops        int
+	// Trusted contains at most 256 copied masked peer prefixes; deployment must strip spoofed forwarding fields.
+	Trusted []netip.Prefix
+	// Mode selects Forwarded by default or explicit XForwarded; syntaxes are not combined.
+	Mode Mode
+	// MaxHops defaults to 16 and is bounded to [1,128].
+	MaxHops int
+	// MaxHeaderBytes defaults to 8192, maximum 1 MiB; admission applies per selected field, not all request headers.
 	MaxHeaderBytes int
 }
     Policy is copied during construction. Trusted accepts at most 256 valid
@@ -616,7 +868,10 @@ const (
 )
 package recovery // import "github.com/faustbrian/go-http-middleware/v2/recovery"
 
-Package recovery contains application panics below an explicit boundary.
+Package recovery contains downstream panics on the serving goroutine below
+an explicit New boundary, not panics in arbitrary spawned goroutines.
+It owns no logger or shutdown. Optional stack traces are sensitive caller-owned
+observations; fixed responses do not expose panic values.
 
 VARIABLES
 
@@ -628,7 +883,11 @@ FUNCTIONS
 
 func New(policy Policy) (func(http.Handler) http.Handler, error)
     New constructs recovery middleware. http.ErrAbortHandler is re-panicked so
-    normal connection abort behavior remains owned by net/http.
+    normal connection abort behavior remains owned by net/http. Other panics
+    notify the borrowed observer synchronously, then emit 500 only while
+    uncommitted. Committed/taken-over output is not rewritten and the original
+    application panic is swallowed. Observer panics are contained, not blocking
+    or privacy leakage.
 
 
 TYPES
@@ -642,23 +901,35 @@ const (
 	// RuntimePanic classifies values implementing runtime.Error.
 	RuntimePanic Class = "runtime_panic"
 )
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
     ConfigError reports an invalid recovery policy field.
 
 func (e *ConfigError) Error() string
+    Error formats the policy-field diagnostic; constructors use fixed field
+    labels.
 
 func (e *ConfigError) Unwrap() error
+    Unwrap exposes ErrInvalidPolicy for errors.Is.
 
 type Event struct {
-	Class     Class
+	// Class is a bounded application/runtime classification, not the panic value.
+	Class Class
+	// Committed records observed writer commitment or successful takeover at recovery.
 	Committed bool
-	Stack     []byte
+	// Stack is an owned optional current-goroutine trace; it may reveal paths and runtime details and is not redacted.
+	Stack []byte
 }
     Event reports safe panic classification and response ownership state.
 
 type Policy struct {
-	Observer      func(Event)
-	CaptureStack  bool
+	// Observer is borrowed synchronous caller code; panics are contained, latency/concurrent safety are not supplied.
+	Observer func(Event)
+	// CaptureStack opts into a bounded runtime.Stack trace, which requires caller privacy controls.
+	CaptureStack bool
+	// MaxStackBytes defaults to 65536 when capture is enabled; maximum 1 MiB, otherwise must be zero.
 	MaxStackBytes int
 }
     Policy configures recovery observation. Observer panics are contained.
@@ -666,6 +937,9 @@ type Policy struct {
 package requestid // import "github.com/faustbrian/go-http-middleware/v2/requestid"
 
 Package requestid propagates bounded request and correlation identifiers.
+Start with New and read typed context metadata through FromContext. Policies
+are copied, generator closures borrowed; concurrent requests require safe
+generators. No signing, deduplication, server or worker lifecycle is owned.
 Identifiers are metadata and are never authorization evidence.
 
 VARIABLES
@@ -677,24 +951,35 @@ var ErrInvalidPolicy = errors.New("requestid: invalid policy")
 FUNCTIONS
 
 func FromContext(ctx context.Context, kind Kind) (string, bool)
-    FromContext returns an identifier stored by this package.
+    FromContext returns an identifier under the exact Kind key. Missing/unknown
+    kinds return false; nil context is not accepted and panics. IDs are
+    metadata, not proof of identity, uniqueness, exactly-once work or replay
+    refusal.
 
 func New(policy Policy) (func(http.Handler) http.Handler, error)
-    New constructs identifier middleware. Defaults are X-Request-ID, 128 bytes,
-    untrusted inbound values, replacement on invalid input, and 128 random bits.
-    Empty, non-ASCII, surrounding-space, control-character, and oversized values
-    are invalid.
+    New constructs identifier middleware. Defaults are X-Request-ID,
+    128 bytes, untrusted inbound values, replacement on invalid input,
+    and crypto/rand.Text. Valid trusted IDs are reused without deduplication;
+    missing IDs still generate under RejectInvalid. Request context is cloned
+    without rewriting inbound headers; the selected response header is set
+    before downstream can overwrite it. Empty, non-ASCII, surrounding-space,
+    control-character, and oversized values are invalid.
 
 
 TYPES
 
-type ConfigError struct{ Field string }
-    ConfigError reports invalid construction input. ConfigError reports an
-    invalid identifier policy field.
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
+    ConfigError reports an invalid identifier policy field.
 
 func (e *ConfigError) Error() string
+    Error formats the policy-field diagnostic; constructors use fixed field
+    labels.
 
 func (e *ConfigError) Unwrap() error
+    Unwrap exposes ErrInvalidPolicy for errors.Is.
 
 type InvalidPolicy uint8
     InvalidPolicy controls trusted invalid inbound identifiers.
@@ -717,20 +1002,30 @@ const (
 	Operation Kind = "operation"
 )
 type Policy struct {
-	Kind           Kind
-	Header         string
+	// Kind is Request by default; Correlation and Operation use independent context keys.
+	Kind Kind
+	// Header names the inbound field; defaults to X-Correlation-ID for Correlation, X-Request-ID otherwise.
+	Header string
+	// ResponseHeader defaults to Header and is set before downstream execution.
 	ResponseHeader string
-	TrustInbound   bool
-	Invalid        InvalidPolicy
-	MaxLength      int
-	Generator      func() (string, error)
+	// TrustInbound allows one admitted inbound value; false generates instead of trusting supplied IDs.
+	TrustInbound bool
+	// Invalid chooses replacement or rejection only for supplied trusted invalid values; zero replaces.
+	Invalid InvalidPolicy
+	// MaxLength caps identifier bytes in [1,1024]; zero defaults to 128.
+	MaxLength int
+	// Generator is borrowed synchronous caller code; nil uses crypto/rand.Text. Errors become fixed 500 responses, panics propagate.
+	Generator func() (string, error)
 }
-    Policy is copied by New and is safe to reuse after construction.
+    Policy values are copied by New; Generator closures remain borrowed and must
+    support concurrent calls when the handler is shared.
 
 package responsepolicy // import "github.com/faustbrian/go-http-middleware/v2/responsepolicy"
 
 Package responsepolicy contains declarative cache and transport admission
-helpers. It does not implement caching or own health handlers.
+helpers. Start with NoStore or Admission; neither implements a cache, health
+handler, retry loop or service lifecycle. State callbacks are caller-owned
+synchronous policy and must be safe for concurrent requests.
 
 VARIABLES
 
@@ -741,8 +1036,11 @@ var ErrInvalidPolicy = errors.New("responsepolicy: invalid policy")
 FUNCTIONS
 
 func Admission(policy AdmissionPolicy) (func(http.Handler) http.Handler, error)
-    Admission short-circuits through a caller-owned concurrency-safe state
-    source.
+    Admission calls the borrowed state source once before downstream; only Ready
+    proceeds. Context is passed, not forcibly enforced: blocking/panicking
+    callbacks block/panic on the serving goroutine. Other/unknown states emit
+    the configured fixed refusal; Retry-After is a hint, not retry/idempotency
+    or readiness storage.
 
 func NoStore() func(http.Handler) http.Handler
     NoStore applies RFC 9111 no-store response policy before downstream
@@ -752,18 +1050,27 @@ func NoStore() func(http.Handler) http.Handler
 TYPES
 
 type AdmissionPolicy struct {
-	State      func(context.Context) State
-	Status     int
+	// State is required borrowed synchronous caller code; only Ready proceeds, unknown values reject.
+	State func(context.Context) State
+	// Status is a rejection status in [400,599]; zero defaults to 503.
+	Status int
+	// RetryAfter is empty, seconds up to 86400 or an HTTP date within 128 admitted bytes.
 	RetryAfter string
 }
     AdmissionPolicy configures transport-only readiness admission.
 
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
     ConfigError reports an invalid response policy field.
 
 func (e *ConfigError) Error() string
+    Error formats the policy-field diagnostic; constructors use fixed field
+    labels.
 
 func (e *ConfigError) Unwrap() error
+    Unwrap exposes ErrInvalidPolicy for errors.Is.
 
 type State uint8
     State is a bounded transport admission state.
@@ -778,7 +1085,11 @@ const (
 )
 package secureheader // import "github.com/faustbrian/go-http-middleware/v2/secureheader"
 
-Package secureheader applies explicit response security header policy.
+Package secureheader applies explicit response header policy through New.
+It checks selected RFC6797/7034 and Referrer Policy tokens/field bounds,
+not TLS deployment, CSP directives, nonce generation or application assets.
+Configuration is copied and header policy reasserted through transparent
+writers.
 
 VARIABLES
 
@@ -789,17 +1100,28 @@ var ErrInvalidPolicy = errors.New("secureheader: invalid policy")
 FUNCTIONS
 
 func New(policy Policy) (func(http.Handler) http.Handler, error)
-    New constructs header middleware.
+    New constructs header middleware, applying nonempty fields at entry and
+    writer operations. Replace reasserts configured values; Preserve uses
+    downstream nonempty values. CSP/Permissions-Policy get only field-value
+    admission, not semantic validation. HSTS acknowledgment is a deployment
+    choice, not proof that HTTPS is working. No response escaping, session,
+    authentication or server is owned.
 
 
 TYPES
 
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
     ConfigError reports an invalid security header policy field.
 
 func (e *ConfigError) Error() string
+    Error formats the policy-field diagnostic; constructors use fixed field
+    labels.
 
 func (e *ConfigError) Unwrap() error
+    Unwrap exposes ErrInvalidPolicy for errors.Is.
 
 type ExistingPolicy uint8
     ExistingPolicy controls configured versus downstream header precedence.
@@ -811,14 +1133,22 @@ const (
 	Preserve
 )
 type Policy struct {
-	XContentTypeOptions   string
-	ReferrerPolicy        string
-	FrameOptions          string
-	PermissionsPolicy     string
+	// XContentTypeOptions is empty or nosniff, case-insensitively validated.
+	XContentTypeOptions string
+	// ReferrerPolicy is empty or one supported policy token.
+	ReferrerPolicy string
+	// FrameOptions is empty, DENY or SAMEORIGIN.
+	FrameOptions string
+	// PermissionsPolicy is opaque deployment text; only field-value bytes are checked, not directive semantics.
+	PermissionsPolicy string
+	// ContentSecurityPolicy is opaque deployment text; application nonces/assets and directive correctness remain caller-owned.
 	ContentSecurityPolicy string
-	HSTS                  string
-	AcknowledgeHSTS       bool
-	Existing              ExistingPolicy
+	// HSTS admits max-age up to ten years and optional includeSubDomains/preload, not HTTPS deployment verification.
+	HSTS string
+	// AcknowledgeHSTS is required when HSTS is nonempty.
+	AcknowledgeHSTS bool
+	// Existing selects Replace by default or Preserve of nonempty downstream values.
+	Existing ExistingPolicy
 }
     Policy is copied during construction. HSTS requires AcknowledgeHSTS because
     an incorrect deployment can create a long-lived outage.

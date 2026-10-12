@@ -1,5 +1,8 @@
 // Package cors implements the server-facing portion of the Fetch CORS
-// protocol. CORS is neither authentication nor CSRF protection.
+// protocol under the repository-pinned Fetch authority, not a full browser
+// implementation. Start with New; configured lists are copied, dynamic origin
+// callbacks borrowed. CORS controls browser visibility, not authentication,
+// request execution or CSRF protection; ordinary denied origins still reach next.
 package cors
 
 import (
@@ -21,24 +24,41 @@ import (
 var ErrInvalidPolicy = errors.New("cors: invalid policy")
 
 // ConfigError reports an invalid CORS policy field.
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
 
+// Error formats the policy-field diagnostic; constructors use fixed field labels.
 func (e *ConfigError) Error() string { return fmt.Sprintf("cors: invalid %s", e.Field) }
+
+// Unwrap exposes ErrInvalidPolicy for errors.Is.
 func (e *ConfigError) Unwrap() error { return ErrInvalidPolicy }
 
 // Policy is normalized and copied during construction.
 type Policy struct {
-	AllowedOrigins      []string
-	AllowOrigin         func(context.Context, string) (bool, error)
-	AllowedMethods      []string
-	AllowedHeaders      []string
-	ExposedHeaders      []string
-	AllowCredentials    bool
+	// AllowedOrigins is copied into canonical http/https/null origins or wildcard; empty denies unless AllowOrigin admits.
+	AllowedOrigins []string
+	// AllowOrigin is borrowed synchronous caller policy for unmatched origins; errors deny, panics propagate, context is advisory.
+	AllowOrigin func(context.Context, string) (bool, error)
+	// AllowedMethods is copied, case-sensitive; empty defaults to GET/HEAD. Credentialed wildcard is rejected.
+	AllowedMethods []string
+	// AllowedHeaders is copied, case-insensitive; credentialed wildcard is rejected.
+	AllowedHeaders []string
+	// ExposedHeaders is copied and emitted in configured order; credentialed wildcard is rejected.
+	ExposedHeaders []string
+	// AllowCredentials emits true and prohibits configured wildcards; it does not authenticate requests.
+	AllowCredentials bool
+	// AllowPrivateNetwork opts into the private-network preflight extension, not general Fetch conformance.
 	AllowPrivateNetwork bool
-	MaxAgeSeconds       int
-	PassPreflight       bool
-	MaxHeaderValues     int
-	MaxHeaderBytes      int
+	// MaxAgeSeconds is in [0,86400]; zero omits the header.
+	MaxAgeSeconds int
+	// PassPreflight forwards accepted preflights instead of ending with 204.
+	PassPreflight bool
+	// MaxHeaderValues defaults to 64, maximum 256; caps each configured list and selected preflight items.
+	MaxHeaderValues int
+	// MaxHeaderBytes defaults to 8192, maximum 1 MiB; caps relevant incoming CORS field bytes, not all headers.
+	MaxHeaderBytes int
 }
 
 type compiled struct {
@@ -60,7 +80,13 @@ type compiled struct {
 
 const maximumRawOriginBytes = 2_048
 
-// New validates wildcard and credential combinations and constructs middleware.
+// New canonicalizes configured origins and validates wildcard/credential policy.
+// Malformed/denied preflights short circuit; ordinary requests with those origins
+// continue without granting CORS access. Wildcard also admits opaque null origin;
+// without wildcard, an exact entry or approving dynamic callback can admit null.
+// Dynamic callback
+// errors deny and panics propagate; callbacks run synchronously with advisory
+// context, without imposed latency or concurrency safety. No request body is read.
 func New(policy Policy) (func(http.Handler) http.Handler, error) {
 	configuration, err := compile(policy)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"github.com/faustbrian/go-http-middleware/v2/content"
 )
 
+// FuzzAcceptMediaTypes exercises arbitrary Accept text through a bounded JSON admission guard without asserting a standards oracle.
 func FuzzAcceptMediaTypes(f *testing.F) {
 	f.Add("application/json")
 	f.Add("*/*;q=0.5")

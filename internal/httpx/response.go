@@ -1,4 +1,7 @@
-// Package httpx contains bounded response mechanics shared by middleware.
+// Package httpx contains private response/field mechanics shared by middleware.
+// Track and WithPolicy retain the pinned httpsnoop optional-interface set;
+// recorder/header state follows net/http writer ownership, not arbitrary concurrent
+// access. Helpers own no connection lifecycle, security policy or wire-delivery proof.
 package httpx
 
 import (
@@ -21,12 +24,19 @@ func CheckWriteHeaderCode(status int) {
 
 // Recorder tracks final status and payload bytes.
 type Recorder struct {
-	Status    int
-	Bytes     int64
+	// Status is the first tracked non-1xx status or implicit 200; zero can remain after takeover.
+	Status int
+	// Bytes counts successful payload writes/ReadFrom results, not wire framing.
+	Bytes int64
+	// Committed is true after final status, payload, flush or successful hijack; recorder access is not synchronized.
 	Committed bool
 }
 
-// Track returns a writer with exactly the optional interfaces of writer.
+// Track returns a borrowed-writer wrapper with exactly its httpsnoop-supported
+// optional interfaces and a mutable unsynchronized per-response recorder. Final
+// status >=200/write/flush or successful hijack commits; 1xx alone does not,
+// including existing 101 tracking omission without write/flush/hijack. Counts
+// reflect successful write results, not framing or delivery acknowledgment.
 func Track(writer http.ResponseWriter) (http.ResponseWriter, *Recorder) {
 	recorder := &Recorder{}
 	wrapped := httpsnoop.Wrap(writer, httpsnoop.Hooks{
@@ -127,7 +137,9 @@ func AddVary(header http.Header, names ...string) {
 	}
 }
 
-// SafeError emits a deterministic text response without internal details.
+// SafeError writes caller-supplied trusted text with no-store/nosniff headers.
+// It does not redact or bound body; package callers supply fixed responses.
+// Final write errors are discarded, not transport-delivery acknowledgment.
 func SafeError(w http.ResponseWriter, status int, body string) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-store")

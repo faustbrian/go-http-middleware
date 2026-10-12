@@ -1,5 +1,9 @@
 // Package compress performs bounded gzip content-coding negotiation. Sensitive
 // dynamic responses should opt out by setting Cache-Control: no-transform.
+// New uses selected RFC9110/9111 field policies, not decompression or message
+// signing. It buffers payload then may stream; header/trailer storage and total
+// heap/time are not capped by MaxBuffer. Buffered writers withhold optional
+// streaming/takeover interfaces; downstream owns request and callback lifetimes.
 package compress
 
 import (
@@ -18,23 +22,39 @@ import (
 // Policy configures bounded gzip response compression. ExcludedTypes accepts
 // at most 64 exact media types of at most 256 bytes each.
 type Policy struct {
+	// MinimumBytes is the minimum payload for gzip eligibility; zero defaults to 1024.
+	// MaxBuffer bounds pending payload before spill, at least MinimumBytes and at most 16 MiB; zero defaults to 1 MiB.
 	MinimumBytes, MaxBuffer int
-	Level, MaxHeaderBytes   int
-	ExcludedTypes           []string
+	// Level is a gzip level; zero selects DefaultCompression rather than NoCompression.
+	// MaxHeaderBytes caps summed Accept-Encoding bytes, default 8192 and maximum 1 MiB; at most 64 items.
+	Level, MaxHeaderBytes int
+	// ExcludedTypes snapshots at most 64 exact media types, each at most 256 bytes; parameters are discarded.
+	ExcludedTypes []string
 }
 
 // ErrInvalidPolicy identifies invalid compression policy configuration.
 var ErrInvalidPolicy = errors.New("compress: invalid policy")
 
 // ConfigError reports an invalid compression policy field.
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
 
+// Error formats the policy-field diagnostic; constructors use fixed field labels.
 func (e *ConfigError) Error() string { return fmt.Sprintf("compress: invalid %s", e.Field) }
+
+// Unwrap exposes ErrInvalidPolicy for errors.Is.
 func (e *ConfigError) Unwrap() error { return ErrInvalidPolicy }
 
 // New constructs gzip middleware. Responses are buffered up to MaxBuffer so
 // eligibility can be decided before commitment. Larger eligible responses
-// continue as gzip streams; other responses spill as identity.
+// continue as gzip streams; other responses spill as identity. Existing wire
+// limitation: an ineligible response can use identity even when negotiation gave
+// identity q=0. The initial 406 only covers no acceptable supported coding.
+// Final buffered copy/encoder-close errors cannot be returned by ServeHTTP and
+// are discarded; payload bytes are not guaranteed transport delivery. Panics
+// propagate after closing an active encoder, without middleware cancellation.
 func New(policy Policy) (func(http.Handler) http.Handler, error) {
 	if policy.MinimumBytes == 0 {
 		policy.MinimumBytes = 1024
@@ -252,6 +272,10 @@ func writeGzip(destination http.ResponseWriter, w *responseBuffer, level int) {
 	_, _ = io.Copy(encoder, &w.buffer)
 	_ = encoder.Close()
 }
+
+// Freeze ordinary representation metadata at the first final status/write,
+// but retain declared trailer names for late copying. Transform-specific
+// digests must not survive a content-coding change as ordinary or trailer fields.
 func (w *responseBuffer) commitHeader() {
 	if w.committed != nil {
 		return

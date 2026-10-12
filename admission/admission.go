@@ -1,5 +1,7 @@
 // Package admission bounds local in-flight requests without implementing a
-// distributed rate algorithm.
+// distributed rate algorithm. New returns a factory whose uses share semaphore
+// state. The caller owns the shutdown signal; middleware owns bounded wait timers
+// and permit release, not active-handler cancellation, draining or server closure.
 package admission
 
 import (
@@ -15,25 +17,40 @@ import (
 // Policy configures bounded local request admission. Wait is capped at one
 // minute.
 type Policy struct {
+	// MaxInFlight is required in [1,1000000]; capacity is shared by the returned factory.
+	// MaxWaiters bounds queued callers in [0,1000000]; zero disables waiting.
 	MaxInFlight, MaxWaiters int
-	Wait                    time.Duration
-	RetryAfterSeconds       int
-	Shutdown                <-chan struct{}
+	// Wait bounds queue residence up to one minute, not handler time; zero refuses saturation.
+	Wait time.Duration
+	// RetryAfterSeconds is a nonnegative refusal hint; zero omits the header.
+	RetryAfterSeconds int
+	// Shutdown is caller-owned; close to persistently refuse/wake waiters. It does not cancel or join admitted handlers.
+	Shutdown <-chan struct{}
 }
 
 // ErrInvalidPolicy identifies invalid admission policy configuration.
 var ErrInvalidPolicy = errors.New("admission: invalid policy")
 
 // ConfigError reports an invalid admission policy field.
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
 
+// Error formats the policy-field diagnostic; constructors use fixed field labels.
 func (e *ConfigError) Error() string { return fmt.Sprintf("admission: invalid %s", e.Field) }
+
+// Unwrap exposes ErrInvalidPolicy for errors.Is.
 func (e *ConfigError) Unwrap() error { return ErrInvalidPolicy }
 
 const maximumWait = time.Minute
 
 // New constructs semaphore admission. Channel wait order is not a contractual
-// fairness guarantee; queues are strictly bounded and allocate no waiter goroutine.
+// fairness guarantee; queues are bounded and allocate no waiter goroutine. Saturation
+// or shutdown emits 503, canceled admission 408. Acquired permits survive until
+// downstream return/panic; shutdown does not revoke them or join active handlers.
+// A queued acquisition rechecks cancellation, but shutdown/acquisition arbitration
+// is not a guarantee that no handler can start concurrently with signal closure.
 func New(policy Policy) (func(http.Handler) http.Handler, error) {
 	if policy.MaxInFlight < 1 || policy.MaxInFlight > 1_000_000 || policy.MaxWaiters < 0 || policy.MaxWaiters > 1_000_000 || policy.Wait < 0 || policy.Wait > maximumWait || policy.RetryAfterSeconds < 0 {
 		return nil, &ConfigError{Field: "limit"}
@@ -82,6 +99,8 @@ func New(policy Policy) (func(http.Handler) http.Handler, error) {
 				reject(w, policy)
 				return
 			}
+			// A ready permit can win select concurrently with cancellation. Refuse
+			// canceled execution and return that permit before invoking downstream.
 			switch r.Context().Err() {
 			case nil:
 			default:

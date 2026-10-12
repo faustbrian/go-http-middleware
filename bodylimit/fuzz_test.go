@@ -10,6 +10,7 @@ import (
 	"github.com/faustbrian/go-http-middleware/v2/bodylimit"
 )
 
+// FuzzBodyLimit covers known/unknown lengths and verifies encoded-byte overflow versus successful no-content handling.
 func FuzzBodyLimit(f *testing.F) {
 	f.Add([]byte("body"), uint16(4), true)
 	f.Add([]byte("overflow"), uint16(1), false)

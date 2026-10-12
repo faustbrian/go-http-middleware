@@ -1,4 +1,7 @@
-// Package bodylimit applies a byte limit before application decoding.
+// Package bodylimit applies an encoded-byte read limit before application
+// decoding. Install New before any body reader; previously consumed bytes cannot
+// be counted. It mutates the request Body/Close fields and delegates body closure
+// to the server/caller. It owns no decompression, multipart parser or read deadline.
 package bodylimit
 
 import (
@@ -15,16 +18,28 @@ import (
 var ErrInvalidPolicy = errors.New("bodylimit: invalid policy")
 
 // ConfigError reports an invalid request body limit policy field.
-type ConfigError struct{ Field string }
+type ConfigError struct {
+	// Field names the invalid policy field without echoing its configured value.
+	Field string
+}
 
+// Error formats the policy-field diagnostic; constructors use fixed field labels.
 func (e *ConfigError) Error() string { return fmt.Sprintf("bodylimit: invalid %s", e.Field) }
+
+// Unwrap exposes ErrInvalidPolicy for errors.Is.
 func (e *ConfigError) Unwrap() error { return ErrInvalidPolicy }
 
 // Policy limits encoded transport bytes. It does not decompress or parse a body.
-type Policy struct{ MaxBytes int64 }
+type Policy struct {
+	// MaxBytes is a required positive encoded-byte ceiling on the body visible at installation.
+	MaxBytes int64
+}
 
 // New constructs body limiting middleware. Streaming overflow is reported to
-// the application as *http.MaxBytesError. The server retains close ownership.
+// the application as *http.MaxBytesError. Overflow marks connection close and
+// emits safe 413 only if no final response was observed. Already committed output
+// cannot be replaced. The original body is borrowed and closure delegates to it;
+// reads depend on caller context/transport deadlines, not forced cancellation.
 func New(policy Policy) (func(http.Handler) http.Handler, error) {
 	if policy.MaxBytes < 1 {
 		return nil, &ConfigError{Field: "maximum bytes"}

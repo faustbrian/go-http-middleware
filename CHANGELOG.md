@@ -4,6 +4,13 @@ This project follows Semantic Versioning and Keep a Changelog.
 
 ## Unreleased
 
+### Changed
+
+- Clarify middleware ordering, borrowed callback/request ownership, cancellation,
+  writer capabilities and limit scope. Document existing chain-depth, negotiation,
+  buffered-timeout and observation limitations without changing runtime policy or
+  endorsing them as protocol conformance.
+
 ## [2.0.1] - 2026-10-11
 
 ### Changed

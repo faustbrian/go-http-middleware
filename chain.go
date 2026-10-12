@@ -1,7 +1,10 @@
 // Package middleware composes explicit net/http middleware without a registry.
 //
-// Middleware are listed in request execution order. Responses unwind through
-// that list in reverse order.
+// Start with New or Described, then resolve Handler around the terminal. Layers
+// are listed in request execution order and response calls unwind in reverse.
+// Construction snapshots metadata, not decorator/handler closures; those remain
+// caller-owned. It owns no server, router, authentication, signing, retry, replay
+// ledger or shutdown. Callback cancellation is cooperative through request context.
 package middleware
 
 import (
@@ -11,7 +14,9 @@ import (
 	"strings"
 )
 
-// Middleware is the standard net/http handler decorator contract.
+// Middleware decorates a borrowed net/http Handler at resolution time. Caller
+// decorators own callback safety, returned handler state and nil/panic behavior;
+// immutable chain metadata does not make those implementations concurrency-safe.
 type Middleware func(http.Handler) http.Handler
 
 // Predicate decides whether conditional middleware applies to a request. A
@@ -35,17 +40,23 @@ var (
 	ErrInvalidOrder = errors.New("middleware: invalid order")
 )
 
-// MaxChainDepth bounds composition work and nested handler depth.
+// MaxChainDepth is the New/Described input-count ceiling. Append/Prepend and
+// Handler do not re-admit that count; it is not a universal serving-depth bound.
 const MaxChainDepth = 256
 
 // ConstructionError reports invalid explicit chain configuration.
 type ConstructionError struct {
-	Op    string
+	// Op identifies the failing construction stage.
+	Op string
+	// Index is the offending layer index; -1 denotes a non-indexed failure.
 	Index int
-	Name  string
-	Err   error
+	// Name is caller-supplied configuration and can be echoed even when invalid.
+	Name string
+	// Err is the wrapped cause for errors.Is/errors.As.
+	Err error
 }
 
+// Error formats construction metadata and its cause; caller names are not redacted.
 func (e *ConstructionError) Error() string {
 	if e.Name != "" {
 		return fmt.Sprintf("middleware: %s %q: %v", e.Op, e.Name, e.Err)
@@ -70,19 +81,28 @@ type Descriptor struct {
 
 // DescriptorConfig declares immutable inspection and ordering metadata.
 type DescriptorConfig struct {
-	Name           string
-	Middleware     Middleware
+	// Name is a nonempty label of at most 128 bytes, not a sanitized logging value.
+	Name string
+	// Middleware is a borrowed decorator invoked during Handler resolution.
+	Middleware Middleware
+	// AllowDuplicate must be true on every repeated occurrence of Name.
 	AllowDuplicate bool
-	Before         []string
-	After          []string
+	// Before requires this layer before the first occurrence of each present name; copied.
+	Before []string
+	// After requires this layer after the last occurrence of each present name; copied.
+	After []string
 }
 
 // DescriptorInfo is an independent introspection snapshot.
 type DescriptorInfo struct {
-	Name           string
+	// Name is the inspection label, empty for unnamed layers.
+	Name string
+	// AllowDuplicate records explicit duplicate permission.
 	AllowDuplicate bool
-	Before         []string
-	After          []string
+	// Before is an independent snapshot of before constraints.
+	Before []string
+	// After is an independent snapshot of after constraints.
+	After []string
 }
 
 // Named constructs an inspectable middleware descriptor.
@@ -138,7 +158,9 @@ func New(middleware ...Middleware) (Chain, error) {
 	return Chain{descriptors: descriptors}, nil
 }
 
-// Described constructs a chain and rejects duplicate non-empty names.
+// Described snapshots descriptors and validates count, nil layers, names and
+// ordering. Repeated nonempty names require every occurrence to permit duplicates;
+// absent ordering targets impose no constraint and layers are never reordered.
 func Described(descriptors ...Descriptor) (Chain, error) {
 	if len(descriptors) > MaxChainDepth {
 		return Chain{}, &ConstructionError{Op: "chain", Index: MaxChainDepth, Err: ErrChainTooDeep}
@@ -150,7 +172,11 @@ func Described(descriptors ...Descriptor) (Chain, error) {
 	return Chain{descriptors: copied}, nil
 }
 
-// Handler resolves the chain around terminal without changing the chain.
+// Handler validates descriptors and resolves decorators from last to first.
+// Nil terminal/results return ConstructionError; decorator panics propagate.
+// Resolution effects are not rolled back on failure. The zero chain returns the
+// terminal. Existing limitation: appended/prepended depth is not rechecked here.
+// Callers own terminal/decorator lifetimes and concurrent invocation safety.
 func (c Chain) Handler(terminal http.Handler) (http.Handler, error) {
 	if terminal == nil {
 		return nil, &ConstructionError{Op: "handler", Index: -1, Err: ErrNilHandler}
@@ -174,13 +200,15 @@ func (c Chain) Descriptors() []Descriptor {
 }
 
 // Prepend returns a new chain with descriptor first. Invalid input is retained
-// for validation by Concat or Handler construction through Described.
+// for descriptor validation by Concat or Handler. No count admission is done here;
+// use Described/Concat to enforce MaxChainDepth before resolving an extended chain.
 func (c Chain) Prepend(descriptor Descriptor) Chain {
 	result := append([]Descriptor{descriptor}, c.descriptors...)
 	return Chain{descriptors: result}
 }
 
-// Append returns a new chain with descriptor last.
+// Append returns a metadata copy with descriptor last, without validation/count
+// admission. Use Described/Concat when the New/Described count ceiling is required.
 func (c Chain) Append(descriptor Descriptor) Chain {
 	result := append([]Descriptor(nil), c.descriptors...)
 	result = append(result, descriptor)
@@ -219,6 +247,8 @@ func When(predicate Predicate, middleware Middleware) (Middleware, error) {
 	}, nil
 }
 
+// Ordering is all-occurrence ordering: Before targets the earliest occurrence,
+// After the latest. Missing names are optional dependencies, not lookup errors.
 func validateDescriptors(descriptors []Descriptor) error {
 	seen := make(map[string]Descriptor, len(descriptors))
 	positions := make(map[string]int, len(descriptors))
