@@ -1,5 +1,8 @@
 # Standards scope and divergences
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API reference](api.md)
+
 The package implements narrow server behavior; it does not claim full
 compliance with an entire specification.
 

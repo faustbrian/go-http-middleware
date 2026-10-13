@@ -1,5 +1,8 @@
 # ResponseWriter compatibility
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API reference](api.md)
+
 | Middleware | Flusher | Hijacker | Pusher | ReaderFrom | ResponseController |
 |---|---|---|---|---|---|
 | chain, request ID, proxy, content, admission | unchanged | unchanged | unchanged | unchanged | unchanged |

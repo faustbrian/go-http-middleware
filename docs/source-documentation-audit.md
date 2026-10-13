@@ -1,5 +1,8 @@
 # Source documentation audit
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API reference](api.md)
+
 ## Pre-edit scope and checks
 
 Base `09a9adcd30efd8612190ce59e93d1f4b31961251`; comments/docs-only Tier A in

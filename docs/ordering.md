@@ -1,5 +1,8 @@
 # Ordering reference
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API reference](api.md)
+
 For `[A, B, C]`, request execution is `A -> B -> C -> handler`; response unwind
 is `handler -> C -> B -> A`. A short circuit prevents every inner layer from
 running. An outer observation layer sees inner short circuits.

@@ -1,5 +1,8 @@
 # Architecture
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API reference](api.md)
+
 Construction and serving are separate. Constructors validate and copy policy;
 request handlers retain no mutable global configuration. The root `Chain` is a
 slice of immutable descriptors resolved around one terminal handler from last

@@ -1,5 +1,8 @@
 # Migration guide
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Adoption guides](adoption.md)
+
 ## Version 2
 
 Use Go 1.27.0 or newer and require

@@ -1,5 +1,8 @@
 # FAQ
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API reference](api.md)
+
 ## Is CORS authentication or CSRF protection?
 
 No. It controls browser response sharing. Authenticate, authorize, and defend

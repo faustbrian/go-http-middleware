@@ -1,10 +1,7 @@
 # http-middleware
 
 [![CI](https://github.com/faustbrian/go-http-middleware/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/faustbrian/go-http-middleware/actions/workflows/ci.yml)
-[![CodeQL](https://img.shields.io/badge/CodeQL-required-blue)](https://github.com/faustbrian/go-http-middleware/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/badge/coverage-100%25_required-blue)](CONTRIBUTING.md#verification)
-[![Mutation](https://img.shields.io/badge/mutation-local_and_scheduled-blue)](CONTRIBUTING.md#verification)
-[![Documentation](https://img.shields.io/badge/docs-checked_in_CI-blue)](docs/)
+[![Documentation](https://img.shields.io/badge/docs-adoption_and_API-blue)](docs/index.md)
 [![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-http-middleware/v2.svg)](https://pkg.go.dev/github.com/faustbrian/go-http-middleware/v2)
 [![Release](https://img.shields.io/github/v/release/faustbrian/go-http-middleware?sort=semver)](https://github.com/faustbrian/go-http-middleware/releases)
 [![Go](https://img.shields.io/badge/go-1.27.0-00ADD8?logo=go)](https://go.dev/)
@@ -14,6 +11,17 @@ Explicit, bounded server-side HTTP middleware built on `net/http`. The root
 package composes only the middleware supplied by the caller. There is no
 registry, router, server runtime, service container, background process, or
 global default chain.
+
+## Adoption entry points
+
+The root module is `github.com/faustbrian/go-http-middleware/v2` (stable).
+It requires Go 1.27.0. Pin the published `v2.0.1` root tag
+with `go get github.com/faustbrian/go-http-middleware/v2@v2.0.1`.
+Install only the modules your application imports; nested module status and
+migration boundaries remain documented separately.
+
+Start with the [documentation map](docs/index.md) for package selection,
+examples, operational constraints, and contributor references.
 
 ## Five-minute chain
 
@@ -116,9 +124,9 @@ authoritative sources and executable evidence.
 
 Shared package selection, construction, ownership, and lifecycle expectations
 follow the versioned [Golib ecosystem
-index](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/README.md)
+index](https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/README.md)
 and its [service-edge package
-guidance](https://github.com/faustbrian/go-library-tools/blob/v1.4.0/docs/ecosystem/design-language.md#package-families-and-selection).
+guidance](https://github.com/faustbrian/go-library-tools/blob/v1.8.4/docs/ecosystem/design-language.md#package-families-and-selection).
 
 ## Compatibility
 

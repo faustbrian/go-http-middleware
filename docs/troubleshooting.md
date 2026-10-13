@@ -1,5 +1,8 @@
 # Troubleshooting
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API reference](api.md)
+
 ## `invalid order`
 
 Inspect `Chain.Descriptors()` and the descriptor's `Before`/`After` metadata.

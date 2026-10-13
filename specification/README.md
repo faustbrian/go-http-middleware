@@ -1,5 +1,8 @@
 # Specification conformance matrix
 
+[Documentation map](../docs/index.md) · [Repository README](../README.md)
+[Next: Documentation map](../docs/index.md)
+
 The [specification decision register](../docs/specification-decisions.md),
 `decisions.json`, `conformance.json`, `decision-history.json`, and
 `monitoring.json` define the auditable contract backed by `manifest.tsv`.

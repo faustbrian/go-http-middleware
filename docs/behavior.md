@@ -1,5 +1,8 @@
 # Behavior tables
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API reference](api.md)
+
 These tables are the deployment contract for security-sensitive decisions.
 Malformed means syntactically invalid, duplicated where singular, or over the
 configured byte or item budget.

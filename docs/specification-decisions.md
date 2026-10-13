@@ -1,5 +1,8 @@
 # HTTP Middleware Specification Decisions
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API reference](api.md)
+
 This register records observable HTTP, Fetch, Go, and deployment-policy choices.
 Machine evidence bindings are in `specification/conformance.json`; superseded
 entries remain here and link to their replacements.

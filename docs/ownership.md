@@ -1,5 +1,8 @@
 # Ownership and sibling integration
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API reference](api.md)
+
 The sibling contract was audited on 2026-07-18 against `service` remote
 commit `258473c234466be0958762b1275d161929754503`. Its `serverhttp.New`
 constructor installs, in order, recovery, request IDs, and body limiting before

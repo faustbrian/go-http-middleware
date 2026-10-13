@@ -1,5 +1,8 @@
 # Compatibility
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Adoption guides](adoption.md)
+
 The public contract is Go 1.27.0 `net/http`. API snapshots are checked against
 `api/baseline.txt`. Incompatible changes require a new major version, changelog,
 and migration notes.

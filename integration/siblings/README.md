@@ -1,5 +1,8 @@
 # Sibling interoperability harness
 
+[Documentation map](../../docs/index.md) · [Repository README](../../README.md)
+[Next: Documentation map](../../docs/index.md)
+
 This internal, non-releasable module verifies that `http-middleware` composes
 with the independently released Golib HTTP service stack. It is an engineering
 verification harness, not a public library or an installation target.

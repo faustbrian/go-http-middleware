@@ -1,5 +1,8 @@
 # Dependency audit
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API reference](api.md)
+
 The runtime graph uses `x/net` v0.59.0 and `x/text` v0.42.0 to preserve CORS
 origin identity through Unicode normalization. Testify v1.12.1 is a test-only
 refresh reached through `goleak` tests, not an IDNA runtime requirement.

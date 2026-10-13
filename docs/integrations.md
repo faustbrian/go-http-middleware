@@ -1,5 +1,8 @@
 # Integration cookbook
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API reference](api.md)
+
 ## router
 
 Resolve this package's server chain around the compiled router. Route-local

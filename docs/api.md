@@ -1,5 +1,8 @@
 # API reference
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Security deployment](security.md)
+
 The authoritative symbol list is Go documentation plus `api/baseline.txt`.
 This page explains the contracts that types alone cannot express.
 

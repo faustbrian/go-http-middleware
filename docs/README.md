@@ -1,5 +1,8 @@
 # Documentation
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Documentation map](index.md)
+
 - [Compiler-checked examples](../example_test.go)
 - [Testing helpers](https://pkg.go.dev/github.com/faustbrian/go-http-middleware/v2/middlewaretest)
 - [API reference](api.md)

@@ -1,5 +1,8 @@
 # Verification evidence
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API reference](api.md)
+
 The explicit full/release gate is reproducible from a clean checkout with
 `make check-full`. Ordinary `make check` and `make ci` select bounded local
 verification, not every campaign below. See

@@ -1,5 +1,8 @@
 # Release process
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API reference](api.md)
+
 1. Run `make check-full` on a clean tree with the declared Go version.
 2. Confirm architecture restrictions, 100.0% production coverage, all declared
    mutants killed, fuzz smoke, race, real HTTP integration, docs, API

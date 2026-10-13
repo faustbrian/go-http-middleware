@@ -1,5 +1,8 @@
 # Adoption guides
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Security deployment](security.md)
+
 ## REST-like APIs
 
 Use recovery, trusted proxy policy, request IDs, observation, CORS, API security

@@ -1,5 +1,8 @@
 # Threat model and resource budgets
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: Adoption guides](adoption.md)
+
 Attackers can control request methods, targets, transport headers, bodies,
 origins, forwarding fields, encoding preferences, media ranges, timing, and
 disconnect behavior. Trusted proxy operators and constructor callers are

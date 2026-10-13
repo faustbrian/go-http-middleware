@@ -1,5 +1,8 @@
 # Performance
 
+[Documentation map](index.md) · [Repository README](../README.md)
+[Next: API reference](api.md)
+
 `BenchmarkBaseAndDeepChains`, `BenchmarkRequestID`, `BenchmarkProxyParsing`,
 `BenchmarkCORSPreflight`, `BenchmarkCompression`, and
 `BenchmarkAdmissionContention` report allocations and latency with `-benchmem`.
