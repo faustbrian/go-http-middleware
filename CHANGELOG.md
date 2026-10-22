@@ -11,6 +11,12 @@ This project follows Semantic Versioning and Keep a Changelog.
   buffered-timeout and observation limitations without changing runtime policy or
   endorsing them as protocol conformance.
 
+## 2.1.0 - 2026-10-22
+
+### Changed
+
+- Publish the current source and documentation with a fresh immutable tag.
+
 ## [2.0.1] - 2026-10-11
 
 ### Changed
